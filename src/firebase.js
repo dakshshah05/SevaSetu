@@ -1,7 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -12,27 +11,26 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Check if configuration is set and valid
+// Check if credentials are set
 const isConfigValid = !!(
   firebaseConfig.apiKey &&
   firebaseConfig.apiKey !== "your_api_key_here" &&
   firebaseConfig.projectId
 );
 
-let app, db, auth, storage;
+let app, db, auth;
 
 if (isConfigValid) {
   try {
     app = initializeApp(firebaseConfig);
     db = getFirestore(app);
     auth = getAuth(app);
-    storage = getStorage(app);
-    console.info("SevaSetu: Live Firebase connected successfully.");
+    console.info("SevaSetu: Live Firebase services initialized.");
   } catch (error) {
-    console.error("SevaSetu: Firebase initialization failed, falling back to Demo Mode:", error);
+    console.error("SevaSetu: Live Firebase initialization failed:", error);
   }
 } else {
-  console.info("SevaSetu: Firebase credentials missing or default. App will run in Demo Mode using LocalStorage.");
+  console.info("SevaSetu: Operating in LocalStorage Fallback Mode. Connect your Firebase project via .env.local to enable live syncing.");
 }
 
-export { db, auth, storage, isConfigValid };
+export { db, auth, isConfigValid };
