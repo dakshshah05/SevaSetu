@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  // Set the base path to match the GitHub repository name for project page hosting
-  base: '/SevaSetu/',
+  // Use subfolder base path on GitHub Actions, default to root for Vercel and local runs
+  base: process.env.GITHUB_ACTIONS ? '/SevaSetu/' : '/',
 })
