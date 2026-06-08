@@ -179,48 +179,63 @@ const updateDoc = async (docRef, data) => {
   return await fbUpdateDoc(docRef, encryptObject(data));
 };
 
+class DecryptedDocumentSnapshot {
+  constructor(snap) {
+    this._snap = snap;
+    this.id = snap.id;
+    this.ref = snap.ref;
+    this.metadata = snap.metadata;
+    this._decryptedData = snap.exists() ? decryptObject(snap.data()) : null;
+  }
+  exists() {
+    return this._snap.exists();
+  }
+  data() {
+    return this._decryptedData;
+  }
+  get(fieldPath) {
+    return this._decryptedData ? this._decryptedData[fieldPath] : undefined;
+  }
+}
+
+class DecryptedQuerySnapshot {
+  constructor(snap) {
+    this._snap = snap;
+    this.docs = snap.docs.map(docSnap => new DecryptedDocumentSnapshot(docSnap));
+    this.size = snap.size;
+    this.empty = snap.empty;
+    this.metadata = snap.metadata;
+    this.query = snap.query;
+  }
+  docChanges(options) {
+    return this._snap.docChanges(options).map(change => ({
+      type: change.type,
+      oldIndex: change.oldIndex,
+      newIndex: change.newIndex,
+      doc: new DecryptedDocumentSnapshot(change.doc)
+    }));
+  }
+  forEach(callback, thisArg) {
+    this.docs.forEach(docSnap => callback.call(thisArg, docSnap));
+  }
+}
+
 const getDoc = async (docRef) => {
   const snap = await fbGetDoc(docRef);
-  if (snap.exists()) {
-    const rawData = snap.data();
-    const decrypted = decryptObject(rawData);
-    Object.defineProperty(snap, "data", {
-      value: () => decrypted,
-      writable: true,
-      configurable: true
-    });
-  }
-  return snap;
+  return new DecryptedDocumentSnapshot(snap);
 };
 
 const getDocs = async (queryRef) => {
   const snap = await fbGetDocs(queryRef);
-  snap.docs.forEach(docSnap => {
-    const rawData = docSnap.data();
-    const decrypted = decryptObject(rawData);
-    Object.defineProperty(docSnap, "data", {
-      value: () => decrypted,
-      writable: true,
-      configurable: true
-    });
-  });
-  return snap;
+  return new DecryptedQuerySnapshot(snap);
 };
 
 const onSnapshot = (queryRef, callback, onError) => {
   return fbOnSnapshot(queryRef, (snap) => {
-    snap.docs.forEach(docSnap => {
-      const rawData = docSnap.data();
-      const decrypted = decryptObject(rawData);
-      Object.defineProperty(docSnap, "data", {
-        value: () => decrypted,
-        writable: true,
-        configurable: true
-      });
-    });
-    callback(snap);
+    callback(new DecryptedQuerySnapshot(snap));
   }, onError);
 };
+
 
 // --- SEED MOCK DATA ---
 const MOCK_USERS = [
