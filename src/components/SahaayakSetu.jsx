@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { Building, User, Check, Plus, Award, Clock } from "lucide-react";
 
 export default function SahaayakSetu({ 
@@ -234,11 +235,12 @@ export default function SahaayakSetu({
       )}
 
       {/* Post Skill Task Modal */}
-      {skillModal && (
+      {skillModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Publish Skill-Based Task</h3>
+              <button className="modal-close" onClick={() => setSkillModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleCreateSkillSubmit}>
@@ -305,15 +307,17 @@ export default function SahaayakSetu({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Complete Task Modal */}
-      {completeModal && (
+      {completeModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Submit Completed Work</h3>
+              <button className="modal-close" onClick={() => setCompleteModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleCompleteSubmit}>
@@ -335,7 +339,8 @@ export default function SahaayakSetu({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

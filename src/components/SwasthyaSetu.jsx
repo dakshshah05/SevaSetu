@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { Plus, Pill, Check, Calendar, MapPin, Clipboard, Activity, Users } from "lucide-react";
 
 export default function SwasthyaSetu({ 
@@ -166,11 +167,12 @@ export default function SwasthyaSetu({
       )}
 
       {/* Camp Scheduling Modal */}
-      {campModal && (
+      {campModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Schedule Free Medical Camp</h3>
+              <button className="modal-close" onClick={() => setCampModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleCreateCamp}>
@@ -223,15 +225,17 @@ export default function SwasthyaSetu({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Register Patient Modal */}
-      {patientModal && (
+      {patientModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Register Patient Checkup Token</h3>
+              <button className="modal-close" onClick={() => setPatientModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleRegisterPatientSubmit}>
@@ -262,15 +266,17 @@ export default function SwasthyaSetu({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Camp Report Modal */}
-      {reportModal && (
+      {reportModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Submit Post-Camp Health Report</h3>
+              <button className="modal-close" onClick={() => setReportModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleCreateReport}>
@@ -301,15 +307,17 @@ export default function SwasthyaSetu({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Donate Medicine Modal */}
-      {medModal && (
+      {medModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Donate Surplus Medicines</h3>
+              <button className="modal-close" onClick={() => setMedModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleDonateMed}>
@@ -363,7 +371,8 @@ export default function SwasthyaSetu({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

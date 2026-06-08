@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { Plus, BookOpen, User, Check, MapPin } from "lucide-react";
 
 export default function ShikshaSetu({ 
@@ -107,11 +108,12 @@ export default function ShikshaSetu({
       )}
 
       {/* Tutor Registration Modal */}
-      {tutorModal && (
+      {tutorModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Register as Volunteer Tutor</h3>
+              <button className="modal-close" onClick={() => setTutorModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleRegisterTutor}>
@@ -158,15 +160,17 @@ export default function ShikshaSetu({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Request Tutoring Modal */}
-      {requestModal && (
+      {requestModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Request Tutoring for a Child</h3>
+              <button className="modal-close" onClick={() => setRequestModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleCreateRequest}>
@@ -234,7 +238,8 @@ export default function ShikshaSetu({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

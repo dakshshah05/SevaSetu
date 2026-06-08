@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { MapPin, Clock, Building, Check, ShieldAlert, Award, Compass } from "lucide-react";
 
 export default function AhaarSetu({ 
@@ -244,7 +245,7 @@ export default function AhaarSetu({
       </div>
 
       {/* Exemption Certificate modal */}
-      {certModal && selectedFood && (
+      {certModal && selectedFood && createPortal(
         <div className="modal-overlay">
           <div className="modal-content" style={{ maxWidth: "600px", padding: "40px", border: "5px double var(--color-green-dark)", textAlign: "center", background: "#fcfaf0" }}>
             <div style={{ border: "2px solid var(--color-green-medium)", padding: "30px", position: "relative" }}>
@@ -269,15 +270,17 @@ export default function AhaarSetu({
               <button className="btn btn-secondary" onClick={() => setCertModal(false)}>Close</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Completion verification modal with ratings */}
-      {completeModal && selectedFood && (
+      {completeModal && selectedFood && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Quality Check & Complete</h3>
+              <button className="modal-close" onClick={() => setCompleteModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <div className="form-group">
@@ -311,15 +314,17 @@ export default function AhaarSetu({
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Schedule Picker modal */}
-      {scheduleModal && (
+      {scheduleModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Schedule Recurring Donation</h3>
+              <button className="modal-close" onClick={() => setScheduleModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleCreateSchedule}>
@@ -375,7 +380,8 @@ export default function AhaarSetu({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

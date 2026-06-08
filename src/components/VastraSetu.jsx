@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { Plus, Gift, Check, Building, MapPin, Truck } from "lucide-react";
 
 export default function VastraSetu({ 
@@ -102,11 +103,12 @@ export default function VastraSetu({
       </div>
 
       {/* Donate Item Modal */}
-      {donateModal && (
+      {donateModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Donate Clothes & Essentials</h3>
+              <button className="modal-close" onClick={() => setDonateModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleDonateSubmit}>
@@ -151,15 +153,17 @@ export default function VastraSetu({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Distribute verification Modal */}
-      {distributeModal && (
+      {distributeModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Distribute Items to Shelter</h3>
+              <button className="modal-close" onClick={() => setDistributeModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleDistributeSubmit}>
@@ -181,7 +185,8 @@ export default function VastraSetu({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

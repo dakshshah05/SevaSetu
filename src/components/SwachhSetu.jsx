@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { Calendar, MapPin, Plus, Upload } from "lucide-react";
 
 export default function SwachhSetu({ 
@@ -225,11 +226,12 @@ export default function SwachhSetu({
       </div>
 
       {/* Upload proof modal */}
-      {proofModal && (
+      {proofModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Upload Cleanup Proof</h3>
+              <button className="modal-close" onClick={() => setProofModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleCreateProof}>
@@ -282,14 +284,17 @@ export default function SwachhSetu({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
+
       {/* Schedule Cleanup Drive Modal */}
-      {driveModal && (
+      {driveModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Schedule Cleanup Campaign</h3>
+              <button className="modal-close" onClick={() => setDriveModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleCreateDrive}>
@@ -367,7 +372,8 @@ export default function SwachhSetu({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

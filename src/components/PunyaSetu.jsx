@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { Plus, Heart, Check, ShieldAlert, FileText } from "lucide-react";
 
 export default function PunyaSetu({ 
@@ -132,11 +133,12 @@ export default function PunyaSetu({
       )}
 
       {/* Elderly Request Modal */}
-      {requestModal && (
+      {requestModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Request Assistant for Senior</h3>
+              <button className="modal-close" onClick={() => setRequestModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleRequestSubmit}>
@@ -201,15 +203,17 @@ export default function PunyaSetu({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Log Visit Modal */}
-      {visitModal && (
+      {visitModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Log Check-in Visit Notes</h3>
+              <button className="modal-close" onClick={() => setVisitModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleVisitSubmit}>
@@ -230,7 +234,8 @@ export default function PunyaSetu({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

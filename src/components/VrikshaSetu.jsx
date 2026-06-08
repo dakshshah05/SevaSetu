@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { Plus, Calendar, MapPin, Sprout } from "lucide-react";
 
 export default function VrikshaSetu({ 
@@ -122,11 +123,12 @@ export default function VrikshaSetu({
       )}
 
       {/* Plant Tree Modal */}
-      {plantModal && (
+      {plantModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Plant & Label a Tree Sapling</h3>
+              <button className="modal-close" onClick={() => setPlantModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handlePlantSubmit}>
@@ -157,15 +159,17 @@ export default function VrikshaSetu({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Growth Update Modal */}
-      {growthModal && (
+      {growthModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Update Tree Growth Status</h3>
+              <button className="modal-close" onClick={() => setGrowthModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleGrowthSubmit}>
@@ -198,7 +202,8 @@ export default function VrikshaSetu({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

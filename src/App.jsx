@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import { 
   LayoutDashboard, 
   Utensils, 
@@ -804,7 +805,7 @@ export default function App() {
       )}
 
       {/* --- MODAL 1: AUTH MODAL --- */}
-      {authModal && (
+      {authModal && createPortal(
         <div className="modal-overlay" onClick={() => setAuthModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
@@ -868,7 +869,8 @@ export default function App() {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

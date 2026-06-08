@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { Plus, Check, MapPin, Heart, Activity } from "lucide-react";
 
 export default function PashuSetu({ 
@@ -147,11 +148,12 @@ export default function PashuSetu({
       )}
 
       {/* Report Stray Modal */}
-      {reportModal && (
+      {reportModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Report Injured Stray Animal</h3>
+              <button className="modal-close" onClick={() => setReportModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleReportSubmit}>
@@ -206,15 +208,17 @@ export default function PashuSetu({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Adopt Modal */}
-      {adoptModal && selectedAnimal && (
+      {adoptModal && selectedAnimal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Adoption Request for {selectedAnimal.animalType}</h3>
+              <button className="modal-close" onClick={() => setAdoptModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={submitAdoption}>
@@ -237,7 +241,8 @@ export default function PashuSetu({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

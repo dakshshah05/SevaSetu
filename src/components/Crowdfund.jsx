@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { Plus, Heart, Clipboard } from "lucide-react";
 
 export default function Crowdfund({ 
@@ -136,11 +137,12 @@ export default function Crowdfund({
       </div>
 
       {/* Campaign Launcher Modal */}
-      {campaignModal && (
+      {campaignModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Launch Transparency Campaign</h3>
+              <button className="modal-close" onClick={() => setCampaignModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleCreateCampaign}>
@@ -183,15 +185,17 @@ export default function Crowdfund({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Spend Proof Upload Modal */}
-      {proofModal && selectedCampaign && (
+      {proofModal && selectedCampaign && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Upload Spend Receipt</h3>
+              <button className="modal-close" onClick={() => setProofModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleProofSubmit}>
@@ -223,11 +227,12 @@ export default function Crowdfund({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Tax Exemption Receipt (80G) Modal */}
-      {receiptModal && selectedCampaign && (
+      {receiptModal && selectedCampaign && createPortal(
         <div className="modal-overlay">
           <div className="modal-content" style={{ maxWidth: "500px", padding: "40px", border: "3px dashed var(--color-green-medium)", background: "#fdfbe8", textAlign: "center" }}>
             <h2 style={{ color: "var(--color-green-dark)" }}>80G TAX EXEMPTION RECEIPT</h2>
@@ -243,7 +248,8 @@ export default function Crowdfund({
             <button className="btn btn-primary" onClick={() => window.print()}>Print / Save Tax Receipt</button>
             <button className="btn btn-secondary" onClick={() => { setReceiptModal(false); setSelectedCampaign(null); }} style={{ marginLeft: "10px" }}>Close</button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

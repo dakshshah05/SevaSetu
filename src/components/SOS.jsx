@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { ShieldAlert, Plus, MapPin, Clock, Check, Sparkles } from "lucide-react";
 
 export default function SOS({
@@ -110,11 +111,12 @@ export default function SOS({
       </div>
 
       {/* Broadcast SOS Modal */}
-      {sosModal && (
+      {sosModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h3>Broadcast Emergency SOS Alert</h3>
+              <button className="modal-close" onClick={() => setSosModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleSOSSubmit}>
@@ -169,7 +171,8 @@ export default function SOS({
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
