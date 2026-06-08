@@ -18,6 +18,11 @@
   --radius-sm: 6px;
   --transition: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   --border-style: 1px solid rgba(48, 109, 41, 0.25);
+
+  /* Scroll progress variables populated dynamically by JS */
+  --scroll-progress: 0;
+  --target-top: 24px;
+  --target-left: 88px;
 }
 
 /* Global resets and structure */
@@ -67,15 +72,88 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--color-green-medium);
 }
 
+/* Intro Hero Page Layer */
+.intro-hero {
+  height: 100vh;
+  width: 100%;
+  background-color: var(--color-beige-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Interactive Scroll Indicator Overlay */
+.scroll-helper {
+  position: absolute;
+  bottom: 5vh;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  user-select: none;
+}
+
+.scroll-arrow {
+  font-size: 20px;
+  line-height: 1;
+  animation: bounce-arrow-intro 1.8s infinite ease-in-out;
+}
+
+@keyframes bounce-arrow-intro {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+/* Interpolating Floating Hero Text Logo */
+.scrolling-logo {
+  position: fixed;
+  z-index: 200;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  color: var(--color-green-dark);
+  letter-spacing: -3px;
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
+  
+  /* Coordinates are driven by scroll-progress */
+  top: calc(50vh - (50vh - var(--target-top, 24px)) * var(--scroll-progress));
+  left: calc(50vw - (50vw - var(--target-left, 88px)) * var(--scroll-progress));
+  
+  /* Translates centered coordinates (-50%) down to top-left (0%) */
+  /* Scales typography from 5.5x down to 1.0x */
+  transform: translate(
+    calc(-50% * (1 - var(--scroll-progress))),
+    calc(-50% * (1 - var(--scroll-progress)))
+  ) scale(calc(5.5 - 4.5 * var(--scroll-progress)));
+  
+  transform-origin: top left;
+  transition: letter-spacing 0.3s ease;
+}
+
 /* Top Sticky Taskbar Navigation */
 .top-taskbar {
-  position: sticky;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 100;
-  background: rgba(251, 245, 221, 0.95);
-  border-bottom: 1px solid var(--color-beige-dark);
+  background: rgba(251, 245, 221, calc(0.96 * var(--scroll-progress)));
+  border-bottom: 1px solid rgba(231, 225, 177, var(--scroll-progress));
+  box-shadow: 0 4px 20px rgba(13, 83, 14, calc(0.06 * var(--scroll-progress)));
   padding: 16px 40px;
   display: flex;
   align-items: center;
@@ -85,10 +163,10 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Taskbar Scrolled state with backdrop-blur */
 .top-taskbar.scrolled {
-  background: rgba(251, 245, 221, 0.8);
+  background: rgba(251, 245, 221, calc(0.82 * var(--scroll-progress)));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 4px 20px rgba(13, 83, 14, 0.06);
+  box-shadow: 0 4px 20px rgba(13, 83, 14, calc(0.06 * var(--scroll-progress)));
   padding: 12px 40px;
 }
 
@@ -112,6 +190,10 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 900;
   font-size: 20px;
   color: var(--color-beige-light);
+  
+  /* Fade in */
+  opacity: var(--scroll-progress);
+  transition: opacity 0.2s ease;
 }
 
 .logo-text {
@@ -119,12 +201,18 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 800;
   font-size: 22px;
   color: var(--color-green-dark);
+  visibility: hidden; /* layout spacer reserved for fixed scrolling logo overlay */
 }
 
 .taskbar-nav {
   display: flex;
   align-items: center;
   gap: 8px;
+  
+  /* Fade in & toggle interaction depending on scroll progress */
+  opacity: var(--scroll-progress);
+  pointer-events: calc(var(--scroll-progress) > 0.8 ? 'auto' : 'none');
+  transition: opacity 0.2s ease;
 }
 
 .taskbar-item {
@@ -177,6 +265,11 @@ h1, h2, h3, h4, h5, h6 {
   padding: 6px 14px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-beige-dark);
+  
+  /* Fade in & toggle interaction depending on scroll progress */
+  opacity: var(--scroll-progress);
+  pointer-events: calc(var(--scroll-progress) > 0.8 ? 'auto' : 'none');
+  transition: opacity 0.2s ease;
 }
 
 .taskbar-user-avatar {
@@ -229,7 +322,7 @@ h1, h2, h3, h4, h5, h6 {
   min-height: 100vh;
 }
 
-/* Main Content Area */
+/* Main Content Area supporting 3D perspective */
 .main-content {
   flex: 1;
   width: 100%;
@@ -239,6 +332,9 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   flex-direction: column;
   gap: 32px;
+  
+  perspective: 1200px;
+  transform-style: preserve-3d;
 }
 
 /* Header summary elements */
@@ -344,16 +440,36 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: var(--radius-lg);
   padding: 24px;
   box-shadow: 0 4px 15px rgba(13, 83, 14, 0.04);
-  transition: var(--transition);
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
+              border-color 0.4s ease, 
+              box-shadow 0.4s ease;
   position: relative;
   overflow: hidden;
   color: var(--color-green-dark);
 }
 
 .card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-6px) scale(1.01);
   border-color: var(--color-green-medium);
-  box-shadow: 0 10px 25px rgba(13, 83, 14, 0.08);
+  box-shadow: 0 16px 36px rgba(13, 83, 14, 0.08);
+}
+
+/* Subtle gradient glow inside card backgrounds */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(251, 245, 221, 0.1), rgba(48, 109, 41, 0.05));
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.card:hover::before {
+  opacity: 1;
 }
 
 /* Card highlight variants using low-opacity borders */

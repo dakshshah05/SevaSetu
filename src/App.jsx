@@ -96,17 +96,36 @@ export default function App() {
     }, 4500);
   }, []);
 
-  // --- SCROLL LISTENERS ---
+  // --- SCROLL AND LOGO TARGETING LISTENERS ---
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
+    const updateLogoTarget = () => {
+      const spacer = document.getElementById("logo-spacer");
+      if (spacer) {
+        const rect = spacer.getBoundingClientRect();
+        document.documentElement.style.setProperty('--target-top', `${rect.top}px`);
+        document.documentElement.style.setProperty('--target-left', `${rect.left}px`);
       }
     };
+
+    const handleScroll = () => {
+      const progress = Math.min(window.scrollY / 250, 1);
+      document.documentElement.style.setProperty('--scroll-progress', progress.toString());
+      setScrolled(window.scrollY > 20);
+      updateLogoTarget();
+    };
+
+    // Initialize layout targets
+    updateLogoTarget();
+    const timer = setTimeout(updateLogoTarget, 100);
+
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("resize", updateLogoTarget);
+    
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", updateLogoTarget);
+    };
   }, []);
 
   // --- REAL-TIME DATA SYNC ---
@@ -150,12 +169,27 @@ export default function App() {
     fetchScores();
   }, [foods, drives, skills, user]);
 
-  // --- GSAP VIEW ENTRANCE (ZOOMOUT EFFECT) ---
+  // --- GSAP 3D PAGE ENTRANCE TRANSITION ---
   useEffect(() => {
     gsap.fromTo(
       ".gsap-reveal",
-      { opacity: 0, scale: 1.08 },
-      { opacity: 1, scale: 1.0, duration: 0.5, ease: "power2.out" }
+      { 
+        opacity: 0, 
+        scale: 0.85,
+        rotationX: 12,
+        transformPerspective: 1200,
+        z: -150,
+        y: 55
+      },
+      { 
+        opacity: 1, 
+        scale: 1.0,
+        rotationX: 0,
+        z: 0,
+        y: 0,
+        duration: 0.75, 
+        ease: "power3.out" 
+      }
     );
   }, [activeView]);
 
@@ -454,11 +488,32 @@ export default function App() {
   return (
     <div className="app-container">
       
+      {/* Intro hero section that occupies 100vh */}
+      <div className="intro-hero">
+        <div className="scroll-helper" style={{ opacity: "calc(1 - var(--scroll-progress) * 3.3)" }}>
+          <span>Scroll to Explore</span>
+          <div className="scroll-arrow">↓</div>
+        </div>
+      </div>
+
+      {/* Floating Logo that interpolates from screen center to taskbar */}
+      <div 
+        className="scrolling-logo" 
+        onClick={() => {
+          window.scrollTo({ top: window.innerHeight, behavior: "smooth" });
+        }}
+      >
+        SevaSetu
+      </div>
+
       {/* --- STICKY TOP TASKBAR NAVIGATION --- */}
       <header className={`top-taskbar ${scrolled ? "scrolled" : ""}`}>
-        <div className="logo-link" onClick={() => setActiveView("dashboard")}>
+        <div className="logo-link" onClick={() => {
+          setActiveView("dashboard");
+          window.scrollTo({ top: window.innerHeight, behavior: "smooth" });
+        }}>
           <div className="logo-box">S</div>
-          <span className="logo-text">SevaSetu</span>
+          <span id="logo-spacer" className="logo-text">SevaSetu</span>
         </div>
 
         <nav className="taskbar-nav">
