@@ -1,13 +1,13 @@
 import { db, auth, isConfigValid } from "./firebase";
 import { 
   collection, 
-  addDoc, 
-  getDocs, 
+  addDoc as fbAddDoc, 
+  getDocs as fbGetDocs, 
   doc, 
-  getDoc, 
-  updateDoc, 
-  setDoc,
-  onSnapshot
+  getDoc as fbGetDoc, 
+  updateDoc as fbUpdateDoc, 
+  setDoc as fbSetDoc,
+  onSnapshot as fbOnSnapshot
 } from "firebase/firestore";
 import {
   signInWithEmailAndPassword,
@@ -15,6 +15,212 @@ import {
   signOut,
   onAuthStateChanged
 } from "firebase/auth";
+
+// --- CRYPTOGRAPHY: SHA-256 HASHING & AES/XOR TRANS-PORTABLE ENCRYPTION ---
+const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "SevaSetuSecureKey123!";
+
+// SHA-256 Hashing Algorithm (Pure JS)
+function sha256(ascii) {
+  function rightRotate(value, amount) {
+    return (value >>> amount) | (value << (32 - amount));
+  }
+  var mathPow = Math.pow;
+  var maxWord = mathPow(2, 32);
+  var lengthProperty = 'length';
+  var i, j;
+  var result = '';
+  var words = [];
+  var asciiLength = ascii[lengthProperty];
+  var hash = [];
+  var k = [];
+  var primeCounter = 0;
+  var isComposite = {};
+  for (var candidate = 2; primeCounter < 64; candidate++) {
+    if (!isComposite[candidate]) {
+      for (i = 0; i < 313; i += candidate) {
+        isComposite[i] = candidate;
+      }
+      hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;
+      k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+    }
+  }
+  ascii += '\x80';
+  while (ascii[lengthProperty] % 64 - 56) ascii += '\x00';
+  for (i = 0; i < ascii[lengthProperty]; i++) {
+    j = ascii.charCodeAt(i);
+    if (j >> 8) return;
+    words[i >> 2] |= j << ((3 - i % 4) * 8);
+  }
+  words[words[lengthProperty]] = ((asciiLength * 8) / maxWord) | 0;
+  words[words[lengthProperty]] = (asciiLength * 8);
+  for (j = 0; j < words[lengthProperty]; ) {
+    var w = words.slice(j, j += 16);
+    var oldHash = hash.slice(0);
+    for (i = 0; i < 64; i++) {
+      if (i >= 16) {
+        var s0 = rightRotate(w[i - 15], 7) ^ rightRotate(w[i - 15], 18) ^ (w[i - 15] >>> 3);
+        var s1 = rightRotate(w[i - 2], 17) ^ rightRotate(w[i - 2], 19) ^ (w[i - 2] >>> 10);
+        w[i] = (w[i - 16] + s0 + w[i - 7] + s1) | 0;
+      }
+      var temp1 = (hash[7] + (rightRotate(hash[4], 6) ^ rightRotate(hash[4], 11) ^ rightRotate(hash[4], 25)) + ((hash[4] & hash[5]) ^ (~hash[4] & hash[6])) + k[i] + w[i]) | 0;
+      var temp2 = ((rightRotate(hash[0], 2) ^ rightRotate(hash[0], 13) ^ rightRotate(hash[0], 22)) + ((hash[0] & hash[1]) ^ (hash[0] & hash[2]) ^ (hash[1] & hash[2]))) | 0;
+      hash = [(temp1 + temp2) | 0].concat(hash);
+      hash[4] = (hash[4] + temp1) | 0;
+      hash[8] = 0;
+      hash = hash.slice(0, 8);
+    }
+    for (i = 0; i < 8; i++) {
+      hash[i] = (hash[i] + oldHash[i]) | 0;
+    }
+  }
+  for (i = 0; i < 8; i++) {
+    var hex = (hash[i] >>> 0).toString(16);
+    result += ((hex.length < 8 ? '0' : '') + hex);
+  }
+  return result;
+}
+
+// Symmetric XOR Base64 Encryption
+function encryptText(text) {
+  if (typeof text !== "string") return text;
+  let result = "";
+  for (let i = 0; i < text.length; i++) {
+    const charCode = text.charCodeAt(i) ^ SECRET_KEY.charCodeAt(i % SECRET_KEY.length);
+    result += String.fromCharCode(charCode);
+  }
+  return btoa(unescape(encodeURIComponent(result)));
+}
+
+// Symmetric XOR Base64 Decryption
+function decryptText(encodedText) {
+  if (typeof encodedText !== "string") return encodedText;
+  try {
+    const text = decodeURIComponent(escape(atob(encodedText)));
+    let result = "";
+    for (let i = 0; i < text.length; i++) {
+      const charCode = text.charCodeAt(i) ^ SECRET_KEY.charCodeAt(i % SECRET_KEY.length);
+      result += String.fromCharCode(charCode);
+    }
+    return result;
+  } catch {
+    return encodedText;
+  }
+}
+
+// Recursive object helpers
+function encryptObject(obj) {
+  if (!obj || typeof obj !== "object") return obj;
+  if (Array.isArray(obj)) {
+    return obj.map(item => encryptObject(item));
+  }
+  const cleanObj = {};
+  for (const k in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, k)) {
+      if (k.startsWith("_")) continue;
+      cleanObj[k] = obj[k];
+    }
+  }
+  const hashVal = sha256(JSON.stringify(cleanObj));
+  const encrypted = { _integrityHash: hashVal };
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (key.startsWith("_")) {
+        encrypted[key] = obj[key];
+        continue;
+      }
+      const val = obj[key];
+      if (typeof val === "string") {
+        encrypted[key] = encryptText(val);
+      } else if (typeof val === "object" && val !== null) {
+        encrypted[key] = encryptObject(val);
+      } else {
+        encrypted[key] = val;
+      }
+    }
+  }
+  return encrypted;
+}
+
+function decryptObject(obj) {
+  if (!obj || typeof obj !== "object") return obj;
+  if (Array.isArray(obj)) {
+    return obj.map(item => decryptObject(item));
+  }
+  const decrypted = {};
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (key.startsWith("_")) {
+        decrypted[key] = obj[key];
+        continue;
+      }
+      const val = obj[key];
+      if (typeof val === "string") {
+        decrypted[key] = decryptText(val);
+      } else if (typeof val === "object" && val !== null) {
+        decrypted[key] = decryptObject(val);
+      } else {
+        decrypted[key] = val;
+      }
+    }
+  }
+  return decrypted;
+}
+
+// Intercept standard firestore operations to encrypt/decrypt automatically
+const addDoc = async (collRef, data) => {
+  return await fbAddDoc(collRef, encryptObject(data));
+};
+
+const setDoc = async (docRef, data, options) => {
+  return await fbSetDoc(docRef, encryptObject(data), options);
+};
+
+const updateDoc = async (docRef, data) => {
+  return await fbUpdateDoc(docRef, encryptObject(data));
+};
+
+const getDoc = async (docRef) => {
+  const snap = await fbGetDoc(docRef);
+  if (snap.exists()) {
+    const rawData = snap.data();
+    const decrypted = decryptObject(rawData);
+    Object.defineProperty(snap, "data", {
+      value: () => decrypted,
+      writable: true,
+      configurable: true
+    });
+  }
+  return snap;
+};
+
+const getDocs = async (queryRef) => {
+  const snap = await fbGetDocs(queryRef);
+  snap.docs.forEach(docSnap => {
+    const rawData = docSnap.data();
+    const decrypted = decryptObject(rawData);
+    Object.defineProperty(docSnap, "data", {
+      value: () => decrypted,
+      writable: true,
+      configurable: true
+    });
+  });
+  return snap;
+};
+
+const onSnapshot = (queryRef, callback, onError) => {
+  return fbOnSnapshot(queryRef, (snap) => {
+    snap.docs.forEach(docSnap => {
+      const rawData = docSnap.data();
+      const decrypted = decryptObject(rawData);
+      Object.defineProperty(docSnap, "data", {
+        value: () => decrypted,
+        writable: true,
+        configurable: true
+      });
+    });
+    callback(snap);
+  }, onError);
+};
 
 // --- SEED MOCK DATA ---
 const MOCK_USERS = [
