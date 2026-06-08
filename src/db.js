@@ -48,16 +48,48 @@ const MOCK_SKILLS = [
   { id: "skill_2", title: "Teach Basic Math to Primary Kids", description: "Teach simple fractions and equations to a batch of 10 children.", requiredSkill: "Teaching", hoursReward: 6, pointsReward: 120, organizerId: "ngo_2", organizerName: "Clean Earth Foundation", status: "open", assignedTo: null, workLink: "" }
 ];
 
+const MOCK_TUTORS = [
+  { id: "tut_1", tutorId: "vol_1", name: "Rahul Kumar", subject: "Mathematics", availability: "Weekends 4-6 PM", location: "Indiranagar", pointsEarned: 120 }
+];
+
+const MOCK_TUTOR_REQUESTS = [
+  { id: "req_1", childName: "Sunny (10 yrs)", parentName: "Ramesh", subject: "Mathematics", location: "Indiranagar", details: "Basic arithmetic and fractions help needed.", status: "matched", matchedTutor: "Rahul Kumar", date: new Date().toISOString() }
+];
+
+const MOCK_CAMPS = [
+  { id: "camp_1", title: "Indiranagar Free Pediatric Health Camp", location: "Indiranagar Community Hall", date: new Date(Date.now() + 4 * 24 * 3600000).toISOString().split('T')[0], description: "Free checkups and distribution of vitamins for kids.", doctors: ["Dr. Aditi Sharma"], patientsCount: 15, status: "scheduled", report: "" }
+];
+
+const MOCK_CLOTHES = [
+  { id: "cl_1", donorName: "Priya Sharma", category: "Children Clothes", details: "Sweaters and t-shirts for ages 5-8", quantity: "1 Bag (12 items)", status: "pending", claimedBy: null, distributionLocation: "" }
+];
+
+const MOCK_ELDERLY = [
+  { id: "eld_1", elderlyName: "Savitri Devi (78 yrs)", helperType: "Groceries & Pharmacy run", location: "Koramangala 4th Block", details: "Needs monthly medicines refilled and wheat bag carried.", status: "assigned", helperId: "vol_2", helperName: "Priya Sharma", date: new Date().toISOString() }
+];
+
+const MOCK_ELDERLY_VISITS = [
+  { id: "vis_1", requestId: "eld_1", notes: "Bought medicines from pharmacy, delivered and checked vitals. She is doing well.", volunteerName: "Priya Sharma", date: new Date().toISOString() }
+];
+
+const MOCK_TREES = [
+  { id: "tree_1", driveTitle: "Clean Earth Lake Side Drive", location: "Koramangala Lake", volunteerName: "Rahul Kumar", treeName: "Rahul's Neem", status: "Healthy Sapling", survivalPhoto: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=300&auto=format&fit=crop&q=60", date: new Date().toISOString() }
+];
+
+const MOCK_ANIMAL_RESCUES = [
+  { id: "ani_1", animalType: "Stray Dog", injuryDetails: "Leg injury, limping near supermarket", location: "Indiranagar Double Road", reportedBy: "Amit Patel", status: "reported", rescuedBy: "", vetDetails: "", date: new Date().toISOString() }
+];
+
 const MOCK_CROWD = [
-  { id: "crowd_1", title: "Rebuild School Roof", description: "Help us fund cement and sheets to fix a storm-damaged classroom roof.", targetAmount: 25000, currentAmount: 18500, organizerId: "ngo_2", organizerName: "Clean Earth Foundation", donations: [{ donorName: "Anonymous", amount: 5000 }, { donorName: "Priya Sharma", amount: 1500 }], proofs: [] }
+  { id: "crowd_1", title: "Rebuild Government Primary School Library", description: "Funds needed to purchase books, paint tables, and install bookshelves for 100 students.", targetAmount: 25000, currentAmount: 12500, organizerId: "ngo_1", organizerName: "Robin Hood Army", donations: [{ donorName: "Rahul Kumar", amount: 500 }], proofs: [] }
 ];
 
 const MOCK_SOS = [
-  { id: "sos_1", title: "Waterlogging - Food Needed", description: "5 families stranded near low-lying subway require dry ration supplies.", severity: "high", location: "Koramangala 3rd Block", organizerId: null, status: "active", date: new Date().toISOString() }
+  { id: "sos_1", title: "Flooded Area Food Supply Run", description: "15 families stranded near low-lying Indiranagar area. Needs immediate dry ration kits.", severity: "critical", location: "Indiranagar 2nd Stage, near canal", status: "active", date: new Date().toISOString() }
 ];
 
 const MOCK_MEDS = [
-  { id: "med_1", medicineName: "Paracetamol 500mg", quantity: "3 Strip (30 tabs)", expiryDate: "2027-12-31", location: "Indiranagar Cafe Hub", donorName: "Green Garden Cafe", status: "available", claimedBy: null }
+  { id: "med_1", medicineName: "Vitamin C Supplements 500mg", quantity: "10 boxes of 100 tablets", expiryDate: "2027-08-15", location: "Koramangala Pharmacy Hub", donorName: "Green Garden Cafe", status: "available", claimedBy: null }
 ];
 
 // Local state initialization for Mock Fallback
@@ -72,6 +104,17 @@ const initializeLocalStorage = () => {
     localStorage.setItem("sevasetu_crowd", JSON.stringify(MOCK_CROWD));
     localStorage.setItem("sevasetu_sos", JSON.stringify(MOCK_SOS));
     localStorage.setItem("sevasetu_meds", JSON.stringify(MOCK_MEDS));
+    
+    // Seed new arrays
+    localStorage.setItem("sevasetu_tutors", JSON.stringify(MOCK_TUTORS));
+    localStorage.setItem("sevasetu_tutor_requests", JSON.stringify(MOCK_TUTOR_REQUESTS));
+    localStorage.setItem("sevasetu_camps", JSON.stringify(MOCK_CAMPS));
+    localStorage.setItem("sevasetu_camps_reg", JSON.stringify([]));
+    localStorage.setItem("sevasetu_clothes", JSON.stringify(MOCK_CLOTHES));
+    localStorage.setItem("sevasetu_elderly", JSON.stringify(MOCK_ELDERLY));
+    localStorage.setItem("sevasetu_elderly_visits", JSON.stringify(MOCK_ELDERLY_VISITS));
+    localStorage.setItem("sevasetu_trees", JSON.stringify(MOCK_TREES));
+    localStorage.setItem("sevasetu_animal_rescues", JSON.stringify(MOCK_ANIMAL_RESCUES));
   }
 };
 initializeLocalStorage();
@@ -86,7 +129,16 @@ const localSubscriptions = {
   skills: [],
   crowd: [],
   sos: [],
-  meds: []
+  meds: [],
+  tutors: [],
+  tutor_requests: [],
+  camps: [],
+  camps_reg: [],
+  clothes: [],
+  elderly: [],
+  elderly_visits: [],
+  trees: [],
+  animal_rescues: []
 };
 
 const notifySubscribers = (key, data) => {
@@ -820,5 +872,463 @@ export const DB = {
       .sort((a, b) => (b.sevaPoints || 0) - (a.sevaPoints || 0));
 
     return { volunteers, restaurants };
+  },
+
+  // 12. Shiksha Setu (Education Support)
+  async registerTutor(subject, availability, location) {
+    const payload = {
+      tutorId: currentLoggedInUser.uid,
+      name: currentLoggedInUser.name,
+      subject,
+      availability,
+      location,
+      pointsEarned: 0
+    };
+    if (isConfigValid) {
+      await addDoc(collection(db, "tutors"), payload);
+    } else {
+      const list = JSON.parse(localStorage.getItem("sevasetu_tutors") || "[]");
+      list.unshift({ id: "tut_" + Date.now(), ...payload });
+      localStorage.setItem("sevasetu_tutors", JSON.stringify(list));
+      notifySubscribers("tutors", list);
+    }
+  },
+
+  async createTutorRequest(childName, parentName, subject, location, details) {
+    const payload = {
+      childName,
+      parentName,
+      subject,
+      location,
+      details,
+      status: "pending",
+      matchedTutor: "",
+      date: new Date().toISOString()
+    };
+    if (isConfigValid) {
+      await addDoc(collection(db, "tutor_requests"), payload);
+    } else {
+      const list = JSON.parse(localStorage.getItem("sevasetu_tutor_requests") || "[]");
+      list.unshift({ id: "req_" + Date.now(), ...payload });
+      localStorage.setItem("sevasetu_tutor_requests", JSON.stringify(list));
+      notifySubscribers("tutor_requests", list);
+    }
+  },
+
+  async matchTutorToRequest(requestId, tutorName) {
+    if (isConfigValid) {
+      const ref = doc(db, "tutor_requests", requestId);
+      await updateDoc(ref, { status: "matched", matchedTutor: tutorName });
+      // Award volunteer points
+      const volRef = doc(db, "users", currentLoggedInUser.uid);
+      await updateDoc(volRef, {
+        rewardPoints: (currentLoggedInUser.rewardPoints || 0) + 40,
+        completedCount: (currentLoggedInUser.completedCount || 0) + 1,
+        impactHours: (currentLoggedInUser.impactHours || 0) + 2
+      });
+      const snap = await getDoc(volRef);
+      this.triggerProfileSync({ uid: currentLoggedInUser.uid, ...snap.data() });
+    } else {
+      const list = JSON.parse(localStorage.getItem("sevasetu_tutor_requests") || "[]");
+      const idx = list.findIndex(item => item.id === requestId);
+      if (idx !== -1) {
+        list[idx].status = "matched";
+        list[idx].matchedTutor = tutorName;
+        localStorage.setItem("sevasetu_tutor_requests", JSON.stringify(list));
+        notifySubscribers("tutor_requests", list);
+
+        const users = JSON.parse(localStorage.getItem("sevasetu_users") || "[]");
+        const vIdx = users.findIndex(u => u.uid === currentLoggedInUser.uid);
+        if (vIdx !== -1) {
+          users[vIdx].rewardPoints += 40;
+          users[vIdx].completedCount += 1;
+          users[vIdx].impactHours += 2;
+          localStorage.setItem("sevasetu_users", JSON.stringify(users));
+          notifySubscribers("users", users);
+          this.triggerProfileSync(users[vIdx]);
+        }
+      }
+    }
+  },
+
+  // 13. Swasthya Setu (Medical Camps)
+  async createMedicalCamp(title, location, date, description) {
+    const payload = {
+      title,
+      location,
+      date,
+      description,
+      doctors: [],
+      patientsCount: 0,
+      status: "scheduled",
+      report: ""
+    };
+    if (isConfigValid) {
+      await addDoc(collection(db, "camps"), payload);
+    } else {
+      const list = JSON.parse(localStorage.getItem("sevasetu_camps") || "[]");
+      list.unshift({ id: "camp_" + Date.now(), ...payload });
+      localStorage.setItem("sevasetu_camps", JSON.stringify(list));
+      notifySubscribers("camps", list);
+    }
+  },
+
+  async registerDoctorForCamp(campId, doctorName) {
+    if (isConfigValid) {
+      const ref = doc(db, "camps", campId);
+      const snap = await getDoc(ref);
+      const docs = snap.data().doctors || [];
+      if (!docs.includes(doctorName)) {
+        docs.push(doctorName);
+        await updateDoc(ref, { doctors: docs });
+      }
+    } else {
+      const list = JSON.parse(localStorage.getItem("sevasetu_camps") || "[]");
+      const idx = list.findIndex(item => item.id === campId);
+      if (idx !== -1) {
+        if (!list[idx].doctors.includes(doctorName)) {
+          list[idx].doctors.push(doctorName);
+          localStorage.setItem("sevasetu_camps", JSON.stringify(list));
+          notifySubscribers("camps", list);
+        }
+      }
+    }
+  },
+
+  async registerPatientForCamp(campId, patientName, patientAge) {
+    const payload = {
+      campId,
+      patientName,
+      patientAge,
+      date: new Date().toISOString()
+    };
+    if (isConfigValid) {
+      await addDoc(collection(db, "camps_reg"), payload);
+      // Increment patient count on camp
+      const campRef = doc(db, "camps", campId);
+      const campSnap = await getDoc(campRef);
+      await updateDoc(campRef, { patientsCount: (campSnap.data().patientsCount || 0) + 1 });
+    } else {
+      const list = JSON.parse(localStorage.getItem("sevasetu_camps_reg") || "[]");
+      list.push({ id: "reg_" + Date.now(), ...payload });
+      localStorage.setItem("sevasetu_camps_reg", JSON.stringify(list));
+      notifySubscribers("camps_reg", list);
+
+      const camps = JSON.parse(localStorage.getItem("sevasetu_camps") || "[]");
+      const idx = camps.findIndex(c => c.id === campId);
+      if (idx !== -1) {
+        camps[idx].patientsCount += 1;
+        localStorage.setItem("sevasetu_camps", JSON.stringify(camps));
+        notifySubscribers("camps", camps);
+      }
+    }
+  },
+
+  async submitCampReport(campId, reportSummary) {
+    if (isConfigValid) {
+      const ref = doc(db, "camps", campId);
+      await updateDoc(ref, { status: "completed", report: reportSummary });
+    } else {
+      const list = JSON.parse(localStorage.getItem("sevasetu_camps") || "[]");
+      const idx = list.findIndex(item => item.id === campId);
+      if (idx !== -1) {
+        list[idx].status = "completed";
+        list[idx].report = reportSummary;
+        localStorage.setItem("sevasetu_camps", JSON.stringify(list));
+        notifySubscribers("camps", list);
+      }
+    }
+  },
+
+  // 14. Vastra Setu (Clothes & Essentials)
+  async listClothesDonation(category, details, quantity) {
+    const payload = {
+      donorName: currentLoggedInUser ? currentLoggedInUser.name : "Anonymous Donor",
+      category,
+      details,
+      quantity,
+      status: "pending",
+      claimedBy: null,
+      distributionLocation: ""
+    };
+    if (isConfigValid) {
+      await addDoc(collection(db, "clothes"), payload);
+    } else {
+      const list = JSON.parse(localStorage.getItem("sevasetu_clothes") || "[]");
+      list.unshift({ id: "cl_" + Date.now(), ...payload });
+      localStorage.setItem("sevasetu_clothes", JSON.stringify(list));
+      notifySubscribers("clothes", list);
+    }
+  },
+
+  async claimClothesPickup(id) {
+    if (isConfigValid) {
+      const ref = doc(db, "clothes", id);
+      await updateDoc(ref, {
+        status: "claimed",
+        claimedBy: currentLoggedInUser.uid,
+        claimedByName: currentLoggedInUser.name
+      });
+    } else {
+      const list = JSON.parse(localStorage.getItem("sevasetu_clothes") || "[]");
+      const idx = list.findIndex(item => item.id === id);
+      if (idx !== -1 && list[idx].status === "pending") {
+        list[idx].status = "claimed";
+        list[idx].claimedBy = currentLoggedInUser.uid;
+        list[idx].claimedByName = currentLoggedInUser.name;
+        localStorage.setItem("sevasetu_clothes", JSON.stringify(list));
+        notifySubscribers("clothes", list);
+      }
+    }
+  },
+
+  async distributeClothes(id, distributionLocation) {
+    if (isConfigValid) {
+      const ref = doc(db, "clothes", id);
+      await updateDoc(ref, { status: "completed", distributionLocation });
+      // Award volunteer points
+      const volRef = doc(db, "users", currentLoggedInUser.uid);
+      await updateDoc(volRef, {
+        rewardPoints: (currentLoggedInUser.rewardPoints || 0) + 35,
+        completedCount: (currentLoggedInUser.completedCount || 0) + 1,
+        impactHours: (currentLoggedInUser.impactHours || 0) + 2
+      });
+      const snap = await getDoc(volRef);
+      this.triggerProfileSync({ uid: currentLoggedInUser.uid, ...snap.data() });
+    } else {
+      const list = JSON.parse(localStorage.getItem("sevasetu_clothes") || "[]");
+      const idx = list.findIndex(item => item.id === id);
+      if (idx !== -1 && list[idx].claimedBy === currentLoggedInUser.uid) {
+        list[idx].status = "completed";
+        list[idx].distributionLocation = distributionLocation;
+        localStorage.setItem("sevasetu_clothes", JSON.stringify(list));
+        notifySubscribers("clothes", list);
+
+        const users = JSON.parse(localStorage.getItem("sevasetu_users") || "[]");
+        const vIdx = users.findIndex(u => u.uid === currentLoggedInUser.uid);
+        if (vIdx !== -1) {
+          users[vIdx].rewardPoints += 35;
+          users[vIdx].completedCount += 1;
+          users[vIdx].impactHours += 2;
+          localStorage.setItem("sevasetu_users", JSON.stringify(users));
+          notifySubscribers("users", users);
+          this.triggerProfileSync(users[vIdx]);
+        }
+      }
+    }
+  },
+
+  // 15. Punya Setu (Elderly Care Connect)
+  async requestElderlyHelper(elderlyName, age, helperType, location, details) {
+    const payload = {
+      elderlyName,
+      age: parseInt(age) || 70,
+      helperType,
+      location,
+      details,
+      status: "pending",
+      helperId: null,
+      helperName: "",
+      date: new Date().toISOString()
+    };
+    if (isConfigValid) {
+      await addDoc(collection(db, "elderly"), payload);
+    } else {
+      const list = JSON.parse(localStorage.getItem("sevasetu_elderly") || "[]");
+      list.unshift({ id: "eld_" + Date.now(), ...payload });
+      localStorage.setItem("sevasetu_elderly", JSON.stringify(list));
+      notifySubscribers("elderly", list);
+    }
+  },
+
+  async claimElderlyHelp(id) {
+    if (isConfigValid) {
+      const ref = doc(db, "elderly", id);
+      await updateDoc(ref, {
+        status: "assigned",
+        helperId: currentLoggedInUser.uid,
+        helperName: currentLoggedInUser.name
+      });
+    } else {
+      const list = JSON.parse(localStorage.getItem("sevasetu_elderly") || "[]");
+      const idx = list.findIndex(item => item.id === id);
+      if (idx !== -1 && list[idx].status === "pending") {
+        list[idx].status = "assigned";
+        list[idx].helperId = currentLoggedInUser.uid;
+        list[idx].helperName = currentLoggedInUser.name;
+        localStorage.setItem("sevasetu_elderly", JSON.stringify(list));
+        notifySubscribers("elderly", list);
+      }
+    }
+  },
+
+  async logElderlyVisit(requestId, notes) {
+    const payload = {
+      requestId,
+      notes,
+      volunteerName: currentLoggedInUser.name,
+      date: new Date().toISOString()
+    };
+    if (isConfigValid) {
+      await addDoc(collection(db, "elderly_visits"), payload);
+      const ref = doc(db, "elderly", requestId);
+      await updateDoc(ref, { status: "completed" });
+      // Award volunteer points
+      const volRef = doc(db, "users", currentLoggedInUser.uid);
+      await updateDoc(volRef, {
+        rewardPoints: (currentLoggedInUser.rewardPoints || 0) + 50,
+        completedCount: (currentLoggedInUser.completedCount || 0) + 1,
+        impactHours: (currentLoggedInUser.impactHours || 0) + 3
+      });
+      const snap = await getDoc(volRef);
+      this.triggerProfileSync({ uid: currentLoggedInUser.uid, ...snap.data() });
+    } else {
+      const list = JSON.parse(localStorage.getItem("sevasetu_elderly_visits") || "[]");
+      list.unshift({ id: "vis_" + Date.now(), ...payload });
+      localStorage.setItem("sevasetu_elderly_visits", JSON.stringify(list));
+      notifySubscribers("elderly_visits", list);
+
+      const requests = JSON.parse(localStorage.getItem("sevasetu_elderly") || "[]");
+      const idx = requests.findIndex(r => r.id === requestId);
+      if (idx !== -1) {
+        requests[idx].status = "completed";
+        localStorage.setItem("sevasetu_elderly", JSON.stringify(requests));
+        notifySubscribers("elderly", requests);
+
+        const users = JSON.parse(localStorage.getItem("sevasetu_users") || "[]");
+        const vIdx = users.findIndex(u => u.uid === currentLoggedInUser.uid);
+        if (vIdx !== -1) {
+          users[vIdx].rewardPoints += 50;
+          users[vIdx].completedCount += 1;
+          users[vIdx].impactHours += 3;
+          localStorage.setItem("sevasetu_users", JSON.stringify(users));
+          notifySubscribers("users", users);
+          this.triggerProfileSync(users[vIdx]);
+        }
+      }
+    }
+  },
+
+  // 16. Vriksha Setu (Tree Plantation)
+  async plantVirtualTree(driveTitle, location, treeName) {
+    const payload = {
+      driveTitle,
+      location,
+      volunteerName: currentLoggedInUser ? currentLoggedInUser.name : "Anonymous Planter",
+      treeName,
+      status: "Healthy Sapling",
+      survivalPhoto: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=300&auto=format&fit=crop&q=60",
+      date: new Date().toISOString()
+    };
+    if (isConfigValid) {
+      await addDoc(collection(db, "trees"), payload);
+      if (currentLoggedInUser) {
+        const volRef = doc(db, "users", currentLoggedInUser.uid);
+        await updateDoc(volRef, {
+          rewardPoints: (currentLoggedInUser.rewardPoints || 0) + 20,
+          completedCount: (currentLoggedInUser.completedCount || 0) + 1,
+          impactHours: (currentLoggedInUser.impactHours || 0) + 1
+        });
+        const snap = await getDoc(volRef);
+        this.triggerProfileSync({ uid: currentLoggedInUser.uid, ...snap.data() });
+      }
+    } else {
+      const list = JSON.parse(localStorage.getItem("sevasetu_trees") || "[]");
+      list.unshift({ id: "tree_" + Date.now(), ...payload });
+      localStorage.setItem("sevasetu_trees", JSON.stringify(list));
+      notifySubscribers("trees", list);
+
+      if (currentLoggedInUser) {
+        const users = JSON.parse(localStorage.getItem("sevasetu_users") || "[]");
+        const vIdx = users.findIndex(u => u.uid === currentLoggedInUser.uid);
+        if (vIdx !== -1) {
+          users[vIdx].rewardPoints += 20;
+          users[vIdx].completedCount += 1;
+          users[vIdx].impactHours += 1;
+          localStorage.setItem("sevasetu_users", JSON.stringify(users));
+          notifySubscribers("users", users);
+          this.triggerProfileSync(users[vIdx]);
+        }
+      }
+    }
+  },
+
+  async updateTreeGrowthStatus(id, survivalPhoto, status) {
+    if (isConfigValid) {
+      const ref = doc(db, "trees", id);
+      await updateDoc(ref, { survivalPhoto, status });
+    } else {
+      const list = JSON.parse(localStorage.getItem("sevasetu_trees") || "[]");
+      const idx = list.findIndex(item => item.id === id);
+      if (idx !== -1) {
+        list[idx].survivalPhoto = survivalPhoto;
+        list[idx].status = status;
+        localStorage.setItem("sevasetu_trees", JSON.stringify(list));
+        notifySubscribers("trees", list);
+      }
+    }
+  },
+
+  // 17. Pashu Setu (Animal Welfare)
+  async reportAnimalInjury(animalType, injuryDetails, location, photoUrl) {
+    const payload = {
+      animalType,
+      injuryDetails,
+      location,
+      reportedBy: currentLoggedInUser ? currentLoggedInUser.name : "Anonymous Reporter",
+      photoUrl: photoUrl || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=300&auto=format&fit=crop&q=60",
+      status: "reported",
+      rescuedBy: "",
+      vetDetails: "",
+      date: new Date().toISOString()
+    };
+    if (isConfigValid) {
+      await addDoc(collection(db, "animal_rescues"), payload);
+    } else {
+      const list = JSON.parse(localStorage.getItem("sevasetu_animal_rescues") || "[]");
+      list.unshift({ id: "ani_" + Date.now(), ...payload });
+      localStorage.setItem("sevasetu_animal_rescues", JSON.stringify(list));
+      notifySubscribers("animal_rescues", list);
+    }
+  },
+
+  async claimAnimalRescue(id, rescuerName) {
+    if (isConfigValid) {
+      const ref = doc(db, "animal_rescues", id);
+      await updateDoc(ref, { status: "rescued", rescuedBy: rescuerName, vetDetails: "Animal Welfare Shelter Clinic" });
+      if (currentLoggedInUser) {
+        const volRef = doc(db, "users", currentLoggedInUser.uid);
+        await updateDoc(volRef, {
+          rewardPoints: (currentLoggedInUser.rewardPoints || 0) + 40,
+          completedCount: (currentLoggedInUser.completedCount || 0) + 1,
+          impactHours: (currentLoggedInUser.impactHours || 0) + 2
+        });
+        const snap = await getDoc(volRef);
+        this.triggerProfileSync({ uid: currentLoggedInUser.uid, ...snap.data() });
+      }
+    } else {
+      const list = JSON.parse(localStorage.getItem("sevasetu_animal_rescues") || "[]");
+      const idx = list.findIndex(item => item.id === id);
+      if (idx !== -1 && list[idx].status === "reported") {
+        list[idx].status = "rescued";
+        list[idx].rescuedBy = rescuerName;
+        list[idx].vetDetails = "Animal Welfare Shelter Clinic";
+        localStorage.setItem("sevasetu_animal_rescues", JSON.stringify(list));
+        notifySubscribers("animal_rescues", list);
+
+        if (currentLoggedInUser) {
+          const users = JSON.parse(localStorage.getItem("sevasetu_users") || "[]");
+          const vIdx = users.findIndex(u => u.uid === currentLoggedInUser.uid);
+          if (vIdx !== -1) {
+            users[vIdx].rewardPoints += 40;
+            users[vIdx].completedCount += 1;
+            users[vIdx].impactHours += 2;
+            localStorage.setItem("sevasetu_users", JSON.stringify(users));
+            notifySubscribers("users", users);
+            this.triggerProfileSync(users[vIdx]);
+          }
+        }
+      }
+    }
   }
-};
+}
