@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { 
   LayoutDashboard, 
   Utensils, 
@@ -20,7 +20,8 @@ import {
   FileCode, 
   MapPin, 
   Clock, 
-  Sparkles
+  Sparkles,
+  Coins
 } from "lucide-react";
 import { DB } from "./db";
 import { isConfigValid } from "./firebase";
@@ -87,13 +88,13 @@ export default function App() {
   const [scrolled, setScrolled] = useState(false);
 
   // --- TOAST NOTIFICATIONS ---
-  const triggerToast = (message, isError = false) => {
+  const triggerToast = useCallback((message, isError = false) => {
     const id = Date.now();
     setToasts(prev => [...prev, { id, message, isError }]);
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
     }, 4500);
-  };
+  }, []);
 
   // --- SCROLL LISTENERS ---
   useEffect(() => {

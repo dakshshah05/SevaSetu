@@ -7,10 +7,7 @@ import {
   getDoc, 
   updateDoc, 
   setDoc,
-  query, 
-  where,
-  onSnapshot,
-  runTransaction
+  onSnapshot
 } from "firebase/firestore";
 import {
   signInWithEmailAndPassword,
@@ -810,13 +807,9 @@ export const DB = {
 
   // 11. Leaderboard (Synchronous calculation from live lists)
   async getLeaderboard() {
-    let usersList = [];
-    if (isConfigValid) {
-      const snap = await getDocs(collection(db, "users"));
-      usersList = snap.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
-    } else {
-      usersList = JSON.parse(localStorage.getItem("sevasetu_users") || "[]");
-    }
+    const usersList = isConfigValid
+      ? (await getDocs(collection(db, "users"))).docs.map(doc => ({ uid: doc.id, ...doc.data() }))
+      : JSON.parse(localStorage.getItem("sevasetu_users") || "[]");
 
     const volunteers = usersList
       .filter(u => u.role === "volunteer")
