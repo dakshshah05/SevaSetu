@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { 
   LayoutDashboard, 
   Utensils, 
@@ -87,6 +87,11 @@ export default function App() {
   // Top Taskbar Scroll State
   const [scrolled, setScrolled] = useState(false);
 
+  // Sliding Pill Nav Highlight
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [pillStyle, setPillStyle] = useState({ opacity: 0 });
+  const navItemsRef = useRef([]);
+
   // --- TOAST NOTIFICATIONS ---
   const triggerToast = useCallback((message, isError = false) => {
     const id = Date.now();
@@ -96,37 +101,48 @@ export default function App() {
     }, 4500);
   }, []);
 
-  // --- SCROLL AND LOGO TARGETING LISTENERS ---
+  // --- SCROLL LISTENER FOR HEADER SCROLLED STATE ---
   useEffect(() => {
-    const updateLogoTarget = () => {
-      const spacer = document.getElementById("logo-spacer");
-      if (spacer) {
-        const rect = spacer.getBoundingClientRect();
-        document.documentElement.style.setProperty('--target-top', `${rect.top}px`);
-        document.documentElement.style.setProperty('--target-left', `${rect.left}px`);
-      }
-    };
-
     const handleScroll = () => {
-      const progress = Math.min(window.scrollY / 250, 1);
-      document.documentElement.style.setProperty('--scroll-progress', progress.toString());
       setScrolled(window.scrollY > 20);
-      updateLogoTarget();
     };
-
-    // Initialize layout targets
-    updateLogoTarget();
-    const timer = setTimeout(updateLogoTarget, 100);
-
     window.addEventListener("scroll", handleScroll);
-    window.addEventListener("resize", updateLogoTarget);
-    
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", updateLogoTarget);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // --- SLIDING NAV PILL ALIGNMENT ---
+  useEffect(() => {
+    if (hoveredIndex !== null && navItemsRef.current[hoveredIndex]) {
+      const el = navItemsRef.current[hoveredIndex];
+      setPillStyle({
+        left: `${el.offsetLeft}px`,
+        width: `${el.offsetWidth}px`,
+        height: `${el.offsetHeight}px`,
+        top: `${el.offsetTop}px`,
+        opacity: 1
+      });
+    } else {
+      setPillStyle(prev => ({ ...prev, opacity: 0 }));
+    }
+  }, [hoveredIndex]);
+
+  // --- INTERSECTION OBSERVER FOR SCROLL REVEALS ---
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("reveal-visible");
+        }
+      });
+    }, { threshold: 0.05 });
+
+    const elements = document.querySelectorAll(".reveal-on-scroll");
+    elements.forEach(el => observer.observe(el));
+
+    return () => {
+      elements.forEach(el => observer.unobserve(el));
+    };
+  }, [activeView]);
 
   // --- REAL-TIME DATA SYNC ---
   useEffect(() => {
@@ -175,20 +191,21 @@ export default function App() {
       ".gsap-reveal",
       { 
         opacity: 0, 
-        scale: 0.85,
-        rotationX: 12,
+        scale: 0.96,
+        rotationX: 3, 
+        y: 20,
+        z: -30,
         transformPerspective: 1200,
-        z: -150,
-        y: 55
+        transformOrigin: "center top"
       },
       { 
         opacity: 1, 
-        scale: 1.0,
+        scale: 1,
         rotationX: 0,
-        z: 0,
         y: 0,
-        duration: 0.75, 
-        ease: "power3.out" 
+        z: 0,
+        duration: 0.55, 
+        ease: "power2.out" 
       }
     );
   }, [activeView]);
@@ -488,60 +505,84 @@ export default function App() {
   return (
     <div className="app-container">
       
-      {/* Intro hero section that occupies 100vh */}
-      <div className="intro-hero">
-        <div className="scroll-helper" style={{ opacity: "calc(1 - var(--scroll-progress) * 3.3)" }}>
-          <span>Scroll to Explore</span>
-          <div className="scroll-arrow">↓</div>
-        </div>
-      </div>
-
-      {/* Floating Logo that interpolates from screen center to taskbar */}
-      <div 
-        className="scrolling-logo" 
-        onClick={() => {
-          window.scrollTo({ top: window.innerHeight, behavior: "smooth" });
-        }}
-      >
-        SevaSetu
-      </div>
-
       {/* --- STICKY TOP TASKBAR NAVIGATION --- */}
       <header className={`top-taskbar ${scrolled ? "scrolled" : ""}`}>
-        <div className="logo-link" onClick={() => {
-          setActiveView("dashboard");
-          window.scrollTo({ top: window.innerHeight, behavior: "smooth" });
-        }}>
+        <div className="logo-link" onClick={() => setActiveView("dashboard")}>
           <div className="logo-box">S</div>
-          <span id="logo-spacer" className="logo-text">SevaSetu</span>
+          <span className="logo-text">SevaSetu</span>
         </div>
 
-        <nav className="taskbar-nav">
-          <div className={`taskbar-item ${activeView === "dashboard" ? "active" : ""}`} onClick={() => setActiveView("dashboard")} role="button">
+        <nav className="taskbar-nav" onMouseLeave={() => setHoveredIndex(null)}>
+          {/* Absolute sliding highlight background */}
+          <div className="nav-highlight-pill" style={pillStyle} />
+
+          <div 
+            ref={el => navItemsRef.current[0] = el}
+            className={`taskbar-item ${activeView === "dashboard" ? "active" : ""}`} 
+            onClick={() => setActiveView("dashboard")} 
+            onMouseEnter={() => setHoveredIndex(0)}
+            role="button"
+          >
             <LayoutDashboard />
             <span>Dashboard</span>
           </div>
-          <div className={`taskbar-item ${activeView === "food-waste" ? "active" : ""}`} onClick={() => setActiveView("food-waste")} role="button">
+          <div 
+            ref={el => navItemsRef.current[1] = el}
+            className={`taskbar-item ${activeView === "food-waste" ? "active" : ""}`} 
+            onClick={() => setActiveView("food-waste")} 
+            onMouseEnter={() => setHoveredIndex(1)}
+            role="button"
+          >
             <Utensils />
             <span>Ahaar Setu</span>
           </div>
-          <div className={`taskbar-item ${activeView === "cleanup-drives" ? "active" : ""}`} onClick={() => setActiveView("cleanup-drives")} role="button">
+          <div 
+            ref={el => navItemsRef.current[2] = el}
+            className={`taskbar-item ${activeView === "cleanup-drives" ? "active" : ""}`} 
+            onClick={() => setActiveView("cleanup-drives")} 
+            onMouseEnter={() => setHoveredIndex(2)}
+            role="button"
+          >
             <Trash2 />
             <span>Swachh Setu</span>
           </div>
-          <div className={`taskbar-item ${activeView === "ngo-admin" ? "active" : ""}`} onClick={() => setActiveView("ngo-admin")} role="button">
+          <div 
+            ref={el => navItemsRef.current[3] = el}
+            className={`taskbar-item ${activeView === "ngo-admin" ? "active" : ""}`} 
+            onClick={() => setActiveView("ngo-admin")} 
+            onMouseEnter={() => setHoveredIndex(3)}
+            role="button"
+          >
             <Building />
             <span>Sahaayak Setu</span>
           </div>
-          <div className={`taskbar-item ${activeView === "skills" ? "active" : ""}`} onClick={() => setActiveView("skills")} role="button">
+          <div 
+            ref={el => navItemsRef.current[4] = el}
+            className={`taskbar-item ${activeView === "skills" ? "active" : ""}`} 
+            onClick={() => setActiveView("skills")} 
+            onMouseEnter={() => setHoveredIndex(4)}
+            role="button"
+          >
             <Briefcase />
             <span>Tasks</span>
           </div>
-          <div className={`taskbar-item ${activeView === "crowd" ? "active" : ""}`} onClick={() => setActiveView("crowd")} role="button">
+          <div 
+            ref={el => navItemsRef.current[5] = el}
+            className={`taskbar-item ${activeView === "crowd" ? "active" : ""}`} 
+            onClick={() => setActiveView("crowd")} 
+            onMouseEnter={() => setHoveredIndex(5)}
+            role="button"
+          >
             <Heart />
             <span>Crowdfund</span>
           </div>
-          <div className={`taskbar-item ${activeView === "sos" ? "active" : ""}`} onClick={() => setActiveView("sos")} role="button">
+          <div 
+            ref={el => navItemsRef.current[6] = el}
+            className={`taskbar-item ${activeView === "sos" ? "active" : ""}`} 
+            onClick={() => setActiveView("sos")} 
+            onMouseEnter={() => setHoveredIndex(6)}
+            role="button"
+          >
             <ShieldAlert />
             <span>SOS</span>
             {activeSOS.length > 0 && (
@@ -550,11 +591,23 @@ export default function App() {
               </span>
             )}
           </div>
-          <div className={`taskbar-item ${activeView === "meds" ? "active" : ""}`} onClick={() => setActiveView("meds")} role="button">
+          <div 
+            ref={el => navItemsRef.current[7] = el}
+            className={`taskbar-item ${activeView === "meds" ? "active" : ""}`} 
+            onClick={() => setActiveView("meds")} 
+            onMouseEnter={() => setHoveredIndex(7)}
+            role="button"
+          >
             <Pill />
             <span>Medicines</span>
           </div>
-          <div className={`taskbar-item ${activeView === "rewards-store" ? "active" : ""}`} onClick={() => setActiveView("rewards-store")} role="button">
+          <div 
+            ref={el => navItemsRef.current[8] = el}
+            className={`taskbar-item ${activeView === "rewards-store" ? "active" : ""}`} 
+            onClick={() => setActiveView("rewards-store")} 
+            onMouseEnter={() => setHoveredIndex(8)}
+            role="button"
+          >
             <Gift />
             <span>Rewards</span>
           </div>
@@ -619,10 +672,10 @@ export default function App() {
           </div>
         </header>
 
-        {/* --- VIEW 1: DASHBOARD --- */}
+         {/* --- VIEW 1: DASHBOARD --- */}
         {activeView === "dashboard" && (
           <section className="module-panel gsap-reveal">
-            <div className="stats-grid">
+            <div className="stats-grid reveal-on-scroll">
               <div className="card stat-card card-teal">
                 <div className="stat-icon teal"><Utensils /></div>
                 <div className="stat-info">
@@ -646,7 +699,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="dashboard-columns">
+            <div className="dashboard-columns reveal-on-scroll">
               <div className="card card-teal">
                 <div className="info-header">
                   <h3>Connecting Hearts, Empowering Civic Drives</h3>
