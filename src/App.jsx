@@ -23,6 +23,7 @@ import {
 import { DB } from "./db";
 import { isConfigValid } from "./firebase";
 import { gsap } from "gsap";
+import logoPng from "./assets/logo.png";
 
 // Import Modular Components
 import Dashboard from "./components/Dashboard";
@@ -268,7 +269,9 @@ export default function App() {
       {/* --- STICKY TOP TASKBAR NAVIGATION --- */}
       <header className={`top-taskbar ${scrolled ? "scrolled" : ""}`}>
         <div className="logo-link" onClick={() => setActiveView("dashboard")}>
-          <div className="logo-box">S</div>
+          <div className="logo-box">
+            <img src={logoPng} alt="SevaSetu Logo" className="logo-img" />
+          </div>
           <span className="logo-text">SevaSetu</span>
         </div>
 
