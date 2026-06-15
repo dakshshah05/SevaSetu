@@ -500,6 +500,7 @@ export default function App() {
         {activeView === "dashboard" && (
           <Dashboard 
             user={user}
+            triggerToast={triggerToast}
             foods={foods}
             drives={drives}
             sosList={sosList}
@@ -681,6 +682,7 @@ export default function App() {
         {activeView === "punya" && (
           <PunyaSetu
             user={user}
+            triggerToast={triggerToast}
             elderly={elderly}
             visits={elderlyVisits}
             onRequestHelper={(elderlyName, age, helperType, location, details) => 
@@ -721,6 +723,7 @@ export default function App() {
         {activeView === "pashu" && (
           <PashuSetu
             user={user}
+            triggerToast={triggerToast}
             rescues={animalRescues}
             onReportInjury={(animalType, injuryDetails, location, photoUrl) => 
               DB.reportAnimalInjury(animalType, injuryDetails, location, photoUrl)
@@ -738,6 +741,7 @@ export default function App() {
         {activeView === "crowd" && (
           <Crowdfund
             user={user}
+            triggerToast={triggerToast}
             crowd={crowd}
             onCreateCampaign={(title, description, targetAmount) => 
               DB.createCampaign(title, description, targetAmount)

@@ -24,7 +24,6 @@ export default function VastraSetu({
     onListDonation(donationForm.category, donationForm.details, donationForm.quantity);
     setDonateModal(false);
     setDonationForm({ category: "Clothes", details: "", quantity: "" });
-    alert("Donation listing registered! A volunteer will pick it up soon.");
   };
 
   const handleOpenDistribute = (id) => {
@@ -37,7 +36,6 @@ export default function VastraSetu({
     onDistribute(selectedItemId, distributeForm.shelter);
     setDistributeModal(false);
     setDistributeForm({ shelter: "" });
-    alert("Distribution complete! Seva points allocated to your account.");
   };
 
   const filteredClothes = clothes.filter(c => {

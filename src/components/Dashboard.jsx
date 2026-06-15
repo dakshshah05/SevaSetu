@@ -10,7 +10,8 @@ export default function Dashboard({
   camps, 
   clothes, 
   rescues,
-  tutors 
+  tutors,
+  triggerToast
 }) {
   const [activeLeaderboardTab, setActiveLeaderboardTab] = useState("volunteers");
   const [csrClaimed, setCsrClaimed] = useState(false);
@@ -37,7 +38,7 @@ export default function Dashboard({
 
   const handleCsrDownload = () => {
     setCsrClaimed(true);
-    alert("CSR Impact Report Generated! Ready for Tax compliance audit.");
+    triggerToast("CSR Impact Report Generated! Ready for Tax compliance audit.");
   };
 
   return (

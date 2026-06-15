@@ -39,7 +39,6 @@ export default function SahaayakSetu({
     onCreateSkillTask(skillForm.title, skillForm.description, skillForm.skill, skillForm.hours, skillForm.points);
     setSkillModal(false);
     setSkillForm({ title: "", description: "", skill: "Graphic Design", hours: 4, points: 60 });
-    alert("Skill-based volunteering task published successfully!");
   };
 
   const handleOpenComplete = (id) => {
@@ -53,7 +52,6 @@ export default function SahaayakSetu({
     setCompleteModal(false);
     setCompleteForm({ workLink: "" });
     setSelectedSkillId("");
-    alert("Deliverable link submitted successfully! Verification points awarded.");
   };
 
   const filteredSkills = skills.filter(s => {

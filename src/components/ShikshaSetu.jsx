@@ -23,7 +23,6 @@ export default function ShikshaSetu({
     onRegisterTutor(tutorForm.subject, tutorForm.availability, tutorForm.location);
     setTutorModal(false);
     setTutorForm({ subject: "Mathematics", availability: "Weekends 10 AM - 12 PM", location: "" });
-    alert("Tutor registration successful! You are now in the Matching database.");
   };
 
   const handleCreateRequest = (e) => {
@@ -31,7 +30,6 @@ export default function ShikshaSetu({
     onCreateTutorRequest(requestForm.childName, requestForm.parentName, requestForm.subject, requestForm.location, requestForm.details);
     setRequestModal(false);
     setRequestForm({ childName: "", parentName: "", subject: "Mathematics", location: "", details: "" });
-    alert("Tutoring request submitted successfully!");
   };
 
   return (

@@ -44,7 +44,6 @@ export default function SwasthyaSetu({
     onRegisterPatient(selectedCampId, patientForm.name, patientForm.age);
     setPatientModal(false);
     setPatientForm({ name: "", age: "" });
-    alert("Patient registration complete! Added to checkup queue.");
   };
 
   const handleOpenReport = (id) => {
@@ -57,7 +56,6 @@ export default function SwasthyaSetu({
     onSubmitReport(selectedCampId, `Completed checkup. Treated ${reportForm.patientsTreated} patients. Summary: ${reportForm.summary}`);
     setReportModal(false);
     setReportForm({ summary: "", patientsTreated: 20 });
-    alert("Camp report filed successfully!");
   };
 
   const handleDonateMed = (e) => {

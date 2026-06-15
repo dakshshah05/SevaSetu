@@ -5,6 +5,7 @@ import { Plus, Heart, Clipboard } from "lucide-react";
 export default function Crowdfund({ 
   user, 
   crowd, 
+  triggerToast,
   onCreateCampaign, 
   onDonateToCampaign, 
   onUploadCampaignProof 
@@ -27,13 +28,12 @@ export default function Crowdfund({
     onCreateCampaign(campaignForm.title, campaignForm.description, campaignForm.target);
     setCampaignModal(false);
     setCampaignForm({ title: "", description: "", target: 15000 });
-    alert("Crowdfunding campaign launched successfully!");
   };
 
   const triggerDonatePayment = (camp) => {
     setSelectedCampaign(camp);
     // Mock Payment Gateway Integration (Razorpay/PayU modal)
-    alert(`💳 Redirecting to Razorpay checkout...\nSimulated payment of ₹${donationAmount} for campaign "${camp.title}"...`);
+    triggerToast(`💳 Processing payment of ₹${donationAmount} for campaign "${camp.title}"...`);
     onDonateToCampaign(camp.id, parseInt(donationAmount));
     setTxnRef("TXN-" + Math.floor(Math.random() * 10000000));
     setReceiptModal(true); // Open the tax benefit receipt modal
@@ -50,7 +50,6 @@ export default function Crowdfund({
     setProofModal(false);
     setProofForm({ imageUrl: "", description: "" });
     setSelectedCampaign(null);
-    alert("Transparency proof (receipt/expense statement) uploaded successfully!");
   };
 
   return (

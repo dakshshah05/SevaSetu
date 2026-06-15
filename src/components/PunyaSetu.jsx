@@ -6,6 +6,7 @@ export default function PunyaSetu({
   user, 
   elderly, 
   visits, 
+  triggerToast,
   onRequestHelper, 
   onClaimHelp, 
   onLogVisit 
@@ -25,7 +26,6 @@ export default function PunyaSetu({
     onRequestHelper(requestForm.name, requestForm.age, requestForm.helperType, requestForm.location, requestForm.details);
     setRequestModal(false);
     setRequestForm({ name: "", age: "", helperType: "Groceries & Pharmacy run", location: "", details: "" });
-    alert("Elderly helper request registered! Local volunteer squad alerted.");
   };
 
   const handleOpenVisit = (id) => {
@@ -38,13 +38,12 @@ export default function PunyaSetu({
     onLogVisit(selectedRequestId, visitForm.notes);
     setVisitModal(false);
     setVisitForm({ notes: "" });
-    alert("Visit check-in logged successfully! Status update dispatched to family members.");
   };
 
   const triggerSOS = () => {
     const loc = prompt("Elderly Emergency! Enter location coordinates or address:", "Koramangala 4th Block, flat 302");
     if (loc) {
-      alert(`🚨 RED ALERT SOS BROADCASTED! Emergency help dispatched to ${loc}. Nearby volunteers notified.`);
+      triggerToast(`🚨 RED ALERT SOS BROADCASTED! Emergency help dispatched to ${loc}. Nearby volunteers notified.`, true);
     }
   };
 

@@ -16,7 +16,6 @@ export default function SOS({
     onBroadcastSOS(sosForm.title, sosForm.description, sosForm.severity, sosForm.location);
     setSosModal(false);
     setSosForm({ title: "", description: "", severity: "high", location: "" });
-    alert("Emergency SOS Alert broadcasted successfully! Nearby relief coordinators notified.");
   };
 
   const activeSOS = sosList.filter(s => s.status === "active");

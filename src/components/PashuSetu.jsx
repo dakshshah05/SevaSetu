@@ -5,6 +5,7 @@ import { Plus, Check, MapPin, Heart, Activity } from "lucide-react";
 export default function PashuSetu({ 
   user, 
   rescues, 
+  triggerToast,
   onReportInjury, 
   onClaimRescue 
 }) {
@@ -22,7 +23,6 @@ export default function PashuSetu({
     onReportInjury(reportForm.animalType, reportForm.details, reportForm.location, reportForm.photoUrl);
     setReportModal(false);
     setReportForm({ animalType: "Stray Dog", details: "", location: "", photoUrl: "" });
-    alert("Injured animal report registered! Nearby volunteers and shelter dispatch notified.");
   };
 
   const triggerAdoptionClick = (ani) => {
@@ -32,7 +32,7 @@ export default function PashuSetu({
 
   const submitAdoption = (e) => {
     e.preventDefault();
-    alert(`Thank you! Adoption application for ${selectedAnimal.animalType} submitted. Our shelters will contact you for a house checkup.`);
+    triggerToast(`Thank you! Adoption application for ${selectedAnimal.animalType} submitted. Our shelters will contact you for a house checkup.`);
     setAdoptModal(false);
     setSelectedAnimal(null);
   };

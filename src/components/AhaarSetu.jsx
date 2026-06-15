@@ -2,9 +2,123 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { MapPin, Clock, Building, Check, ShieldAlert, Award, Compass } from "lucide-react";
 
+function TransitMap({ foodId, location }) {
+  const mapId = `map-${foodId}`;
+
+  useEffect(() => {
+    let cssLink = document.getElementById("leaflet-css");
+    if (!cssLink) {
+      cssLink = document.createElement("link");
+      cssLink.id = "leaflet-css";
+      cssLink.rel = "stylesheet";
+      cssLink.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+      document.head.appendChild(cssLink);
+    }
+
+    let map = null;
+    let interval = null;
+
+    const initMap = () => {
+      if (!window.L) return;
+
+      const container = window.L.DomUtil.get(mapId);
+      if (container) {
+        container._leaflet_id = null;
+      }
+
+      let startCoords = [12.9716, 77.6412]; // Indiranagar
+      let endCoords = [12.9610, 77.6387];   // Domlur Shelter
+      
+      if (location && location.toLowerCase().includes("koramangala")) {
+        startCoords = [12.9352, 77.6244]; // Koramangala
+        endCoords = [12.9141, 77.6411];   // HSR Shelter
+      }
+
+      map = window.L.map(mapId, {
+        zoomControl: false,
+        attributionControl: false
+      }).setView(startCoords, 14);
+
+      window.L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+        maxZoom: 19
+      }).addTo(map);
+
+      const restaurantIcon = window.L.divIcon({
+        html: `<div style="background-color: var(--color-green-dark); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3)">🏪</div>`,
+        className: "",
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+      });
+
+      const shelterIcon = window.L.divIcon({
+        html: `<div style="background-color: #d35400; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3)">🏠</div>`,
+        className: "",
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+      });
+
+      const volunteerIcon = window.L.divIcon({
+        html: `<div style="background-color: var(--color-green-medium); color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.4); z-index: 9999;">🚴</div>`,
+        className: "",
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
+      });
+
+      window.L.marker(startCoords, { icon: restaurantIcon }).addTo(map).bindPopup("Restaurant (Pickup)");
+      window.L.marker(endCoords, { icon: shelterIcon }).addTo(map).bindPopup("Shelter (Destination)");
+
+      const routeLine = window.L.polyline([startCoords, endCoords], {
+        color: "var(--color-green-medium)",
+        weight: 4,
+        dashArray: "6, 8",
+        opacity: 0.8
+      }).addTo(map);
+
+      const volMarker = window.L.marker(startCoords, { icon: volunteerIcon }).addTo(map).bindPopup("Volunteer in Transit");
+
+      let progress = 0;
+      interval = setInterval(() => {
+        progress += 0.005;
+        if (progress > 1) progress = 0;
+
+        const currentLat = startCoords[0] + (endCoords[0] - startCoords[0]) * progress;
+        const currentLng = startCoords[1] + (endCoords[1] - startCoords[1]) * progress;
+        volMarker.setLatLng([currentLat, currentLng]);
+      }, 50);
+
+      map.fitBounds(routeLine.getBounds(), { padding: [20, 20] });
+    };
+
+    if (!window.L) {
+      let script = document.getElementById("leaflet-js");
+      if (!script) {
+        script = document.createElement("script");
+        script.id = "leaflet-js";
+        script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+        script.onload = initMap;
+        document.body.appendChild(script);
+      } else {
+        script.addEventListener("load", initMap);
+      }
+    } else {
+      initMap();
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+      if (map) map.remove();
+    };
+  }, [mapId, location]);
+
+  return (
+    <div id={mapId} style={{ width: "100%", height: "180px", position: "relative", zIndex: 1, marginTop: "8px" }} />
+  );
+}
+
 export default function AhaarSetu({ 
   user, 
   foods, 
+  triggerToast,
   onAddPickup, 
   onClaimPickup, 
   onCompletePickup 
@@ -49,7 +163,7 @@ export default function AhaarSetu({
       ...scheduleForm
     }]);
     setScheduleModal(false);
-    alert("Recurring donation schedule set up successfully!");
+    triggerToast("Recurring donation schedule set up successfully!");
   };
 
   const triggerCompleteClick = (f) => {
@@ -207,20 +321,7 @@ export default function AhaarSetu({
                         <div style={{ padding: "6px", background: "rgba(48, 109, 41, 0.1)", fontSize: "10px", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px", color: "var(--color-green-dark)" }}>
                           <Compass size={12} className="animate-spin" /> Volunteer Transit GPS Map
                         </div>
-                        {/* Interactive Vector Route Map */}
-                        <svg viewBox="0 0 300 80" style={{ width: "100%", height: "80px", background: "#f8f6d6" }}>
-                          <path d="M 30,40 Q 150,10 270,40" fill="none" stroke="#e7e1b1" strokeWidth="4" strokeDasharray="5,5" />
-                          <path d="M 30,40 Q 150,10 270,40" fill="none" stroke="var(--color-green-medium)" strokeWidth="4" strokeDasharray="300" strokeDashoffset="200">
-                            <animate attributeName="stroke-dashoffset" values="300;0" dur="8s" repeatCount="indefinite" />
-                          </path>
-                          <circle cx="30" cy="40" r="6" fill="var(--color-green-dark)" />
-                          <circle cx="270" cy="40" r="6" fill="var(--color-green-medium)" />
-                          {/* Courier Icon */}
-                          <g transform="translate(150, 25)">
-                            <text x="-8" y="0" style={{ fontSize: "16px" }}>🚴</text>
-                            <animateMotion path="M 30,40 Q 150,10 270,40" dur="8s" repeatCount="indefinite" rotate="auto" />
-                          </g>
-                        </svg>
+                        <TransitMap foodId={f.id} location={f.location} />
                       </div>
                     )}
 

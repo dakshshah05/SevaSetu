@@ -22,7 +22,6 @@ export default function VrikshaSetu({
     onPlantTree(plantForm.driveTitle, plantForm.location, plantForm.treeName);
     setPlantModal(false);
     setPlantForm({ driveTitle: "Clean Earth Lake Side Drive", location: "Koramangala Lake", treeName: "" });
-    alert("Virtual tree sapling registered! Planting points earned.");
   };
 
   const handleOpenGrowth = (id) => {
@@ -35,7 +34,6 @@ export default function VrikshaSetu({
     onUpdateTree(selectedTreeId, growthForm.photoUrl || "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=300", growthForm.status);
     setGrowthModal(false);
     setGrowthForm({ photoUrl: "", status: "Growing Young Tree" });
-    alert("Tree growth check-in logged successfully!");
   };
 
   // Get icon based on tree growth status
