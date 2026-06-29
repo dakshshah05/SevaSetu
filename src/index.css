@@ -1042,7 +1042,7 @@ select.form-control option {
   box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible; /* Allow robot to overflow top border */
   animation: slideInChat 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
@@ -1051,49 +1051,28 @@ select.form-control option {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* WebGL Canvas Positioning when in Chat Window */
+.chatbot-avatar-canvas-container.in-window {
+  position: absolute;
+  top: -46px;
+  left: 16px;
+  z-index: 10000;
+  cursor: default;
+}
+
 /* Header */
 .chatbot-header {
   padding: 16px;
+  padding-left: 96px; /* Shift to the right to leave space for overlapping robot */
   background: linear-gradient(135deg, var(--color-green-medium), var(--color-green-dark));
   color: var(--color-beige-light);
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.chatbot-header-3d-head {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #a3e635 0%, #16a34a 40%, #15803d 70%);
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.specular-highlight-small {
-  position: absolute;
-  top: 2px;
-  left: 4px;
-  width: 10px;
-  height: 6px;
-  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 80%);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.digital-eyes-small {
-  display: flex;
-  gap: 5px;
-}
-
-.eye-small {
-  width: 3px;
-  height: 5px;
-  background: white;
-  border-radius: 50%;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
 }
 
 .chatbot-close-btn {

@@ -23,7 +23,7 @@ export default function Chatbot({
     {
       id: "welcome",
       sender: "bot",
-      text: "👋 Hi! I am SevaBuddy, your cute 3D civic assistant. I can search live database listings (food pickups, cleanup drives, active SOS coordinates, trees planted, stray animal rescues) and answer questions about the SevaSetu platform. How can I help you today?"
+      text: "👋 Hi! I am SevaBuddy, your cute 3D civic assistant. I can search live database listings (food packages, cleanup drives, active SOS coordinates, trees planted, stray animal rescues) and answer questions about the SevaSetu platform. How can I help you today?"
     }
   ]);
   const [inputText, setInputText] = useState("");
@@ -31,13 +31,13 @@ export default function Chatbot({
   const chatEndRef = useRef(null);
   const canvasRef = useRef(null);
 
-  // 3D Three.js Interactive Robot Setup
+  // 3D Three.js Interactive Robot Setup (runs once on mount)
   useEffect(() => {
-    if (isOpen || !canvasRef.current) return;
+    if (!canvasRef.current) return;
 
     const canvas = canvasRef.current;
-    const width = canvas.clientWidth || 80;
-    const height = canvas.clientHeight || 80;
+    const width = 80;
+    const height = 90;
 
     // 1. Scene & Camera
     const scene = new THREE.Scene();
@@ -61,7 +61,6 @@ export default function Chatbot({
     dirLight.position.set(3, 4, 3);
     scene.add(dirLight);
 
-    // Subtle green bounce light from bottom
     const greenBounceLight = new THREE.DirectionalLight(0x22c55e, 0.5);
     greenBounceLight.position.set(-2, -4, -1);
     scene.add(greenBounceLight);
@@ -72,7 +71,7 @@ export default function Chatbot({
 
     // 4. Materials
     const whitePlastic = new THREE.MeshStandardMaterial({
-      color: 0xf3f4f6, // bright greyish white
+      color: 0xf3f4f6,
       roughness: 0.15,
       metalness: 0.05
     });
@@ -84,7 +83,7 @@ export default function Chatbot({
     });
 
     const greenTrim = new THREE.MeshStandardMaterial({
-      color: 0x15803d, // SevaSetu Green
+      color: 0x15803d,
       roughness: 0.2,
       metalness: 0.2
     });
@@ -104,7 +103,7 @@ export default function Chatbot({
     // 5. Robot Group Assembly
     const robot = new THREE.Group();
 
-    // Body (chubby egg shape)
+    // Body
     const bodyGeo = new THREE.SphereGeometry(0.55, 32, 32);
     const body = new THREE.Mesh(bodyGeo, whitePlastic);
     body.scale.set(1, 1.15, 0.95);
@@ -123,11 +122,10 @@ export default function Chatbot({
     core.position.set(0, -0.38, 0.51);
     robot.add(core);
 
-    // Head Group (for independent rotation)
+    // Head Group
     const headGroup = new THREE.Group();
     headGroup.position.y = 0.35;
 
-    // Head Mesh (stretched dome)
     const headGeo = new THREE.SphereGeometry(0.72, 32, 32);
     const head = new THREE.Mesh(headGeo, whitePlastic);
     head.scale.set(1.15, 0.96, 1.0);
@@ -142,7 +140,6 @@ export default function Chatbot({
 
     // Eyes
     const eyeGeo = new THREE.SphereGeometry(0.11, 32, 32);
-    
     const eyeLeft = new THREE.Mesh(eyeGeo, eyeMaterial);
     eyeLeft.position.set(-0.24, 0.02, 0.72);
     headGroup.add(eyeLeft);
@@ -153,7 +150,6 @@ export default function Chatbot({
 
     // Specular eye highlights
     const specGeo = new THREE.SphereGeometry(0.035, 16, 16);
-    
     const specLeft = new THREE.Mesh(specGeo, eyeHighlightMaterial);
     specLeft.position.set(-0.21, 0.06, 0.81);
     headGroup.add(specLeft);
@@ -164,7 +160,6 @@ export default function Chatbot({
 
     // Ears / Headsets
     const earGeo = new THREE.CylinderGeometry(0.14, 0.14, 0.12, 32);
-    
     const earLeft = new THREE.Mesh(earGeo, greenTrim);
     earLeft.rotation.z = Math.PI / 2;
     earLeft.position.set(-0.84, 0, 0);
@@ -179,7 +174,6 @@ export default function Chatbot({
 
     // Arms
     const armGeo = new THREE.SphereGeometry(0.13, 16, 16);
-    
     const armLeft = new THREE.Mesh(armGeo, whitePlastic);
     armLeft.scale.set(1.0, 1.4, 1.0);
     armLeft.position.set(-0.7, -0.4, 0.05);
@@ -192,7 +186,6 @@ export default function Chatbot({
 
     // Legs / Feet
     const legGeo = new THREE.CylinderGeometry(0.11, 0.13, 0.22, 16);
-    
     const legLeft = new THREE.Mesh(legGeo, whitePlastic);
     legLeft.position.set(-0.24, -1.05, 0.05);
     robot.add(legLeft);
@@ -202,7 +195,6 @@ export default function Chatbot({
     robot.add(legRight);
 
     const footGeo = new THREE.SphereGeometry(0.14, 16, 16);
-    
     const footLeft = new THREE.Mesh(footGeo, greenTrim);
     footLeft.scale.set(1, 0.6, 1.3);
     footLeft.position.set(-0.24, -1.16, 0.1);
@@ -216,20 +208,19 @@ export default function Chatbot({
     robot.position.y = 0.15;
     scene.add(robot);
 
-    // 6. Mouse Cursor Tracking Coordinates
+    // Mouse Tracking Coordinates
     let targetX = 0;
     let targetY = 0;
 
     const handleMouseMove = (e) => {
       const x = (e.clientX / window.innerWidth) * 2 - 1;
       const y = -(e.clientY / window.innerHeight) * 2 + 1;
-      // Limit range to prevent weird deformations
       targetX = x * 0.35;
       targetY = y * 0.25;
     };
     window.addEventListener("mousemove", handleMouseMove);
 
-    // 7. Render Animation Loop
+    // Animation Loop
     let clock = new THREE.Clock();
     let animId = null;
 
@@ -239,12 +230,11 @@ export default function Chatbot({
       // Bobbing floating motion
       robot.position.y = 0.15 + Math.sin(elapsedTime * 2.2) * 0.07;
       
-      // Interpolate head and body rotations to smoothly target cursor position
+      // Interpolate rotations smoothly
       headGroup.rotation.y += (targetX - headGroup.rotation.y) * 0.1;
       headGroup.rotation.x += (-targetY - headGroup.rotation.x) * 0.1;
       robot.rotation.y += (targetX * 0.4 - robot.rotation.y) * 0.08;
 
-      // Animate core glow intensity over time
       core.material.color.setHSL(0.25, 0.8, 0.5 + Math.sin(elapsedTime * 4) * 0.15);
 
       renderer.render(scene, camera);
@@ -253,14 +243,13 @@ export default function Chatbot({
 
     animate();
 
-    // 8. Cleanup
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       cancelAnimationFrame(animId);
       renderer.dispose();
       scene.clear();
     };
-  }, [isOpen]);
+  }, []);
 
   useEffect(() => {
     if (chatEndRef.current) {
@@ -268,36 +257,108 @@ export default function Chatbot({
     }
   }, [messages, isTyping]);
 
-  const generateResponse = (message) => {
+  // AI Gemini API RAG Query Call
+  const fetchGeminiResponse = async (userMessage) => {
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (!apiKey) return null;
+
+    try {
+      const systemInstruction = `You are SevaBuddy, a cute 3D chatbot helper for SevaSetu.
+Your mission is to answer questions using ONLY the live database context and website information below.
+If the user asks about anything unrelated to SevaSetu (e.g., general knowledge, math, coding, jokes, non-SevaSetu weather, politics, other apps), you MUST decline politely and tell them you can only assist with SevaSetu community queries.
+
+WEBSITE MODULES DESCRIPTION:
+- Ahaar Setu: Surplus food redistribution from restaurants to volunteer networks.
+- Swachh Setu: Sanitation drives with photo verification.
+- Sahaayak Setu: Volunteer rosters, NGO administrative Consoles, and skill-based micro-tasks.
+- Seva Rewards Store: Exchange volunteer points for discounts (Zepto, Swiggy, BookMyShow).
+- Punya Setu: Elder companionship requests and transparent Crowdfunding campaigns.
+- Swasthya Setu: Free medical camps and surplus medicine donation pool.
+- Shiksha Setu: Volunteer tutoring for children.
+- Vastra Setu: Clothes/essentials donation drives.
+- Vriksha Setu: Virtual forest sapling planting and labeling grid.
+- SOS: Emergency neighborhood disaster/flood broadcasts.
+
+LIVE COMMUNITY DATABASE STATE (JSON FORMAT):
+- User Session Profile: ${JSON.stringify(user)}
+- Emergency SOS Alerts: ${JSON.stringify(sosList.filter(s => s.status === 'active'))}
+- Surplus Food Alerts: ${JSON.stringify(foods.filter(f => f.status === 'pending'))}
+- Cleanup Drives: ${JSON.stringify(drives.filter(d => d.date >= new Date().toISOString().split('T')[0]))}
+- NGO Admin Tasks: ${JSON.stringify(skills.filter(s => s.status === 'open'))}
+- Children Tutoring Requests: ${JSON.stringify(tutorRequests.filter(r => r.status === 'pending'))}
+- Medical Camps Scheduled: ${JSON.stringify(camps.filter(c => c.status === 'scheduled'))}
+- Medicine Pool Stock: ${JSON.stringify(meds.filter(m => m.status === 'available'))}
+- Clothes Donations: ${JSON.stringify(clothes.filter(c => c.status === 'pending'))}
+- Seniors Help Requests: ${JSON.stringify(elderly.filter(e => e.status === 'pending'))}
+- Virtual Trees Planted: ${JSON.stringify(trees)}
+- Stray Animal Rescues: ${JSON.stringify(rescues.filter(r => r.status === 'reported'))}
+- Crowdfunding Campaigns: ${JSON.stringify(crowd)}
+
+CRITICAL RESPONSE INSTRUCTIONS:
+1. If the user query is off-topic, say: "🤖 I am SevaBuddy, a dedicated chatbot helper for SevaSetu. I am programmed to only answer questions regarding the SevaSetu platform, its civic modules, and our live database. Please ask a question related to SevaSetu community activities!"
+2. Format lists with clean Markdown bullet points.
+3. Be friendly, encouraging, and brief.`;
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{ text: userMessage }]
+            }],
+            systemInstruction: {
+              parts: [{ text: systemInstruction }]
+            }
+          })
+        }
+      );
+
+      const data = await response.json();
+      if (data.candidates && data.candidates[0].content.parts[0].text) {
+        return data.candidates[0].content.parts[0].text.trim();
+      }
+      return null;
+    } catch (err) {
+      console.error("Gemini API Error, falling back to local engine:", err);
+      return null;
+    }
+  };
+
+  // Local Regex matching engine (fallback)
+  const generateLocalResponse = (message) => {
     const msg = message.toLowerCase();
-    
-    // 1. STRICT OFF-TOPIC KEYWORD CHECKS
+
+    // Whitelist check using strict word boundaries \b to avoid substring false matches (e.g. weather/eat)
     const whitelist = [
-      "hi", "hello", "hey", "help", "who are you", "what are you", "sevasetu", "buddy",
-      "food", "eat", "meal", "surplus", "restaurant", "ahaar", "biryani", "waste", "package", "pick",
-      "clean", "drive", "swachh", "trash", "sanitation", "garbage", "rubbish",
-      "ngo", "task", "skills", "graphic", "design", "work", "sahaayak", "job",
-      "teach", "tutor", "education", "study", "math", "child", "shiksha", "learn",
-      "camp", "medical", "doctor", "health", "medicine", "pill", "swasthya", "clinic",
-      "clothes", "donation", "blanket", "toy", "book", "shirt", "pants", "vastra",
-      "elder", "senior", "groceries", "companionship", "visit", "punya", "grandparent",
-      "tree", "plant", "sapling", "canopy", "forest", "vriksha",
-      "animal", "dog", "cat", "rescue", "vet", "stray", "pashu", "pet", "adopt",
-      "fund", "money", "crowdfund", "campaign", "donate", "rs", "rupees", "contribute",
-      "sos", "emergency", "flood", "disaster", "danger", "urgent",
-      "reward", "point", "store", "voucher", "discount", "swiggy", "zepto", "ticket", "coupon",
-      "who am i", "my account", "role", "profile", "points", "dashboard"
+      /\b(hi|hello|hey|help|buddy)\b/i,
+      /\b(sevasetu|seva|setu)\b/i,
+      /\b(food|eat|meal|surplus|restaurant|ahaar|package|pick)\b/i,
+      /\b(clean|drive|swachh|trash|sanitation|garbage|rubbish)\b/i,
+      /\b(ngo|task|skills|graphic|design|work|sahaayak|job)\b/i,
+      /\b(teach|tutor|education|study|math|child|shiksha|learn)\b/i,
+      /\b(camp|medical|doctor|health|medicine|pill|swasthya|clinic)\b/i,
+      /\b(clothes|donation|blanket|toy|book|shirt|pants|vastra)\b/i,
+      /\b(elder|senior|groceries|companionship|visit|punya|grandparent)\b/i,
+      /\b(tree|plant|sapling|canopy|forest|vriksha)\b/i,
+      /\b(animal|dog|cat|rescue|vet|stray|pashu|pet|adopt)\b/i,
+      /\b(fund|money|crowdfund|campaign|donate|rs|rupees|contribute)\b/i,
+      /\b(sos|emergency|flood|disaster|danger|urgent)\b/i,
+      /\b(reward|point|store|voucher|discount|swiggy|zepto|ticket|coupon)\b/i,
+      /\b(who am i|my account|role|profile|points|dashboard)\b/i
     ];
 
-    const hasMatch = whitelist.some(keyword => msg.includes(keyword));
+    const hasMatch = whitelist.some(rx => rx.test(msg));
 
     if (!hasMatch) {
-      return "🤖 I am SevaBuddy, a dedicated chatbot helper for SevaSetu. I am programmed to only answer questions regarding the SevaSetu platform, its civic modules, and our live community database.\n\n" +
+      return "🤖 I am SevaBuddy, a dedicated chatbot helper for SevaSetu. I am programmed to only answer questions regarding the SevaSetu platform, its civic modules, and our live database.\n\n" +
         "Please ask a question related to SevaSetu (e.g. food listings, cleanup drives, tutoring slots, animal rescues, or emergency SOS alerts)!";
     }
 
-    // 2. WHITELISTED GENERAL WELCOME/INTRO
-    if (msg.includes("hello") || msg.includes("hi") || msg.includes("hey") || msg.includes("who are you") || msg.includes("what are you") || msg.includes("help") || msg.includes("who is sevasetu") || msg.includes("what is sevasetu")) {
+    if (/\b(hello|hi|hey|help|who are you|what are you)\b/i.test(msg)) {
       return "🤖 Hello! I am SevaBuddy, your interactive 3D chatbot helper. I can search live database entries (food packages, cleanup drives, active SOS coordinates, trees planted, stray animal rescues) and guide you on how to contribute to SevaSetu.\n\n" +
         "Try asking me things like:\n" +
         "👉 *Is there any surplus food?*\n" +
@@ -307,8 +368,7 @@ export default function Chatbot({
         "👉 *How do I earn reward points?*";
     }
 
-    // Check SOS
-    if (msg.includes("sos") || msg.includes("emergency") || msg.includes("urgent") || msg.includes("flood") || msg.includes("disaster") || msg.includes("danger")) {
+    if (/\b(sos|emergency|urgent|flood|disaster|danger)\b/i.test(msg)) {
       const active = sosList.filter(s => s.status === "active");
       if (active.length > 0) {
         return `🚨 There are ${active.length} active emergency SOS alert(s):\n` + 
@@ -317,8 +377,7 @@ export default function Chatbot({
       return "🟢 All clear! There are currently no active emergency SOS alerts in the neighborhood.";
     }
     
-    // Check Food/Ahaar
-    if (msg.includes("food") || msg.includes("eat") || msg.includes("meal") || msg.includes("surplus") || msg.includes("restaurant") || msg.includes("ahaar") || msg.includes("package") || msg.includes("pick")) {
+    if (/\b(food|eat|meal|surplus|restaurant|ahaar|package|pick)\b/i.test(msg)) {
       const pending = foods.filter(f => f.status === "pending");
       if (pending.length > 0) {
         return `🍲 We have ${pending.length} pending surplus food pickup(s):\n` +
@@ -328,8 +387,7 @@ export default function Chatbot({
       return "🍲 There are no pending surplus food alerts right now. Restaurants can list food in the Ahaar Setu tab!";
     }
     
-    // Check Cleanup Drives/Swachh
-    if (msg.includes("clean") || msg.includes("drive") || msg.includes("swachh") || msg.includes("trash") || msg.includes("sanitation") || msg.includes("garbage") || msg.includes("rubbish")) {
+    if (/\b(clean|drive|swachh|trash|sanitation|garbage|rubbish)\b/i.test(msg)) {
       const active = drives.filter(d => d.date >= new Date().toISOString().split("T")[0]);
       if (active.length > 0) {
         return `🧹 Active Swachh Bharat Drives:\n` +
@@ -339,8 +397,7 @@ export default function Chatbot({
       return "🧹 No upcoming sanitation drives scheduled. NGOs can schedule a drive under the Swachh Setu tab!";
     }
     
-    // Check NGO tasks/Sahaayak
-    if (msg.includes("ngo") || msg.includes("task") || msg.includes("skills") || msg.includes("graphic") || msg.includes("design") || msg.includes("work") || msg.includes("sahaayak") || msg.includes("job")) {
+    if (/\b(ngo|task|skills|graphic|design|work|sahaayak|job)\b/i.test(msg)) {
       const openTasks = skills.filter(s => s.status === "open");
       if (openTasks.length > 0) {
         return `💼 Open Skill-based NGO micro-tasks:\n` +
@@ -350,8 +407,7 @@ export default function Chatbot({
       return "💼 No open skill tasks. NGOs can post tasks like design, bookkeeping, etc., in the Sahaayak Setu tab.";
     }
 
-    // Check Tutor/Shiksha
-    if (msg.includes("teach") || msg.includes("tutor") || msg.includes("education") || msg.includes("study") || msg.includes("math") || msg.includes("child") || msg.includes("shiksha") || msg.includes("learn")) {
+    if (/\b(teach|tutor|education|study|math|child|shiksha|learn)\b/i.test(msg)) {
       const activeReqs = tutorRequests.filter(r => r.status === "pending");
       if (activeReqs.length > 0) {
         return `📚 Active tutoring requests for children:\n` +
@@ -361,8 +417,7 @@ export default function Chatbot({
       return "📚 All children are currently matched with tutors. You can request new tutoring support or register as a tutor in Shiksha Setu!";
     }
 
-    // Check Health/Swasthya/Meds
-    if (msg.includes("camp") || msg.includes("medical") || msg.includes("doctor") || msg.includes("health") || msg.includes("medicine") || msg.includes("pill") || msg.includes("swasthya") || msg.includes("clinic")) {
+    if (/\b(camp|medical|doctor|health|medicine|pill|swasthya|clinic)\b/i.test(msg)) {
       const activeCamps = camps.filter(c => c.status === "scheduled");
       const activeMeds = meds.filter(m => m.status === "available");
       let resp = "";
@@ -380,8 +435,7 @@ export default function Chatbot({
       return resp;
     }
 
-    // Check Clothes/Vastra
-    if (msg.includes("clothes") || msg.includes("donation") || msg.includes("blanket") || msg.includes("toy") || msg.includes("book") || msg.includes("shirt") || msg.includes("pants") || msg.includes("vastra")) {
+    if (/\b(clothes|donation|blanket|toy|book|shirt|pants|vastra)\b/i.test(msg)) {
       const pending = clothes.filter(c => c.status === "pending");
       if (pending.length > 0) {
         return `🎁 Items listed for donation (pending pickup):\n` +
@@ -391,8 +445,7 @@ export default function Chatbot({
       return "🎁 No pending clothes/essentials donations listed. You can list items to donate in the Vastra Setu tab!";
     }
 
-    // Check Elderly/Punya
-    if (msg.includes("elder") || msg.includes("senior") || msg.includes("groceries") || msg.includes("companionship") || msg.includes("visit") || msg.includes("punya") || msg.includes("grandparent")) {
+    if (/\b(elder|senior|groceries|companionship|visit|punya|grandparent)\b/i.test(msg)) {
       const pending = elderly.filter(e => e.status === "pending");
       if (pending.length > 0) {
         return `❤️ Elderly support requests pending helper:\n` +
@@ -402,16 +455,14 @@ export default function Chatbot({
       return "❤️ All senior citizen requests have active helpers. Request assistance for a senior in the Punya Setu tab!";
     }
 
-    // Check Trees/Vriksha
-    if (msg.includes("tree") || msg.includes("plant") || msg.includes("sapling") || msg.includes("canopy") || msg.includes("forest") || msg.includes("vriksha")) {
+    if (/\b(tree|plant|sapling|canopy|forest|vriksha)\b/i.test(msg)) {
       const count = trees.length;
       return `🌳 We have planted ${count} virtual name-labeled trees in our canopy grid!\n` +
         (count > 0 ? trees.slice(0, 5).map(t => `- **${t.treeName}** (Planted by ${t.volunteerName})`).join("\n") : "Be the first to plant a virtual tree!") +
         "\nExplore upcoming schedules and plant saplings in the Vriksha Setu tab.";
     }
 
-    // Check Animal Rescue/Pashu
-    if (msg.includes("animal") || msg.includes("dog") || msg.includes("cat") || msg.includes("rescue") || msg.includes("vet") || msg.includes("stray") || msg.includes("pashu") || msg.includes("pet") || msg.includes("adopt")) {
+    if (/\b(animal|dog|cat|rescue|vet|stray|pashu|pet|adopt)\b/i.test(msg)) {
       const reported = rescues.filter(r => r.status === "reported");
       if (reported.length > 0) {
         return `🐾 Injured stray animals reported (pending rescue):\n` +
@@ -421,8 +472,7 @@ export default function Chatbot({
       return "🐾 No stray animal injuries reported. Report strays, adopt pets, or view vet clinics in the Pashu Setu tab!";
     }
 
-    // Check Crowdfund/Campaigns
-    if (msg.includes("fund") || msg.includes("money") || msg.includes("crowdfund") || msg.includes("campaign") || msg.includes("donate") || msg.includes("rs") || msg.includes("rupees") || msg.includes("contribute")) {
+    if (/\b(fund|money|crowdfund|campaign|donate|rs|rupees|contribute)\b/i.test(msg)) {
       if (crowd.length > 0) {
         return `🪙 Active Crowdfunding Campaigns (100% transparent):\n` +
           crowd.map(c => `- **${c.title}**: Raised ₹${c.currentAmount} of ₹${c.targetAmount} (${Math.round((c.currentAmount/c.targetAmount)*100)}%)`).join("\n") +
@@ -431,15 +481,13 @@ export default function Chatbot({
       return "🪙 No active crowdfunding campaigns at the moment. NGOs can launch campaigns in the Crowdfund tab.";
     }
 
-    // Check Points & Rewards
-    if (msg.includes("reward") || msg.includes("point") || msg.includes("store") || msg.includes("voucher") || msg.includes("discount") || msg.includes("swiggy") || msg.includes("zepto") || msg.includes("ticket") || msg.includes("coupon")) {
+    if (/\b(reward|point|store|voucher|discount|swiggy|zepto|ticket|coupon)\b/i.test(msg)) {
       return "🎁 Earning & Redeeming Points on SevaSetu:\n" +
         "- **Earn Points**: By claiming food pickups (+30 Pts), participating in cleanup drives (+50 Pts), teaching (+40 Pts), assisting seniors (+50 Pts), rescuing animals (+40 Pts), or donating money (+10 Pts per ₹100).\n" +
         "- **Redeem Vouchers**: Visit the *Rewards* tab to redeem points for Zepto, Swiggy, or BookMyShow discounts!";
     }
 
-    // User context
-    if (msg.includes("who am i") || msg.includes("my account") || msg.includes("role") || msg.includes("profile") || msg.includes("points")) {
+    if (/\b(who am i|my account|role|profile|points)\b/i.test(msg)) {
       if (user) {
         return `👤 Profile Details:\n` +
           `- **Name**: ${user.name}\n` +
@@ -452,11 +500,10 @@ export default function Chatbot({
       return "👤 You are currently a Guest. Click the *Login* button in the top-right taskbar to sign in or register!";
     }
 
-    // Default fallback (should not trigger due to whitelists but keeping as safety)
     return "🤖 Please ask a question related to SevaSetu civic modules or our community database!";
   };
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!inputText.trim()) return;
 
@@ -470,51 +517,44 @@ export default function Chatbot({
     setInputText("");
     setIsTyping(true);
 
-    setTimeout(() => {
-      const responseText = generateResponse(userMsg.text);
-      const botMsg = {
-        id: (Date.now() + 1).toString(),
-        sender: "bot",
-        text: responseText
-      };
-      setMessages(prev => [...prev, botMsg]);
-      setIsTyping(false);
-    }, 1000);
+    // 1. Try Gemini API first (RAG)
+    let replyText = await fetchGeminiResponse(userMsg.text);
+
+    // 2. Fall back to local regex matching engine if no API Key or fetch error
+    if (!replyText) {
+      replyText = generateLocalResponse(userMsg.text);
+    }
+
+    const botMsg = {
+      id: (Date.now() + 1).toString(),
+      sender: "bot",
+      text: replyText
+    };
+
+    setMessages(prev => [...prev, botMsg]);
+    setIsTyping(false);
   };
 
   return (
-    <div id="sevasetu-chatbot">
-      {/* 3D Interactive WebGL Floating Avatar */}
-      {!isOpen && (
-        <button 
-          className="chatbot-avatar-btn" 
-          onClick={() => setIsOpen(true)}
-          title="Chat with SevaBuddy"
-        >
-          <div className="chatbot-avatar-canvas-container">
-            <canvas ref={canvasRef} className="chatbot-avatar-canvas" />
-          </div>
-          <div className="chatbot-avatar-shadow"></div>
-        </button>
-      )}
+    <div id="sevasetu-chatbot" className={isOpen ? "open" : ""}>
+      {/* 3D WebGL Floating/Transitioning Robot Canvas Container */}
+      <div 
+        className={`chatbot-avatar-canvas-container ${isOpen ? "in-window" : ""}`}
+        onClick={() => { if (!isOpen) setIsOpen(true); }}
+        title="Chat with SevaBuddy"
+      >
+        <canvas ref={canvasRef} className="chatbot-avatar-canvas" />
+      </div>
+      {!isOpen && <div className="chatbot-avatar-shadow"></div>}
 
       {/* Chat Window */}
       {isOpen && (
         <div className="chatbot-window">
           {/* Header */}
           <div className="chatbot-header">
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <div className="chatbot-header-3d-head">
-                <div className="specular-highlight-small"></div>
-                <div className="digital-eyes-small">
-                  <div className="eye-small"></div>
-                  <div className="eye-small"></div>
-                </div>
-              </div>
-              <div>
-                <h4 style={{ margin: 0, fontSize: "14px", fontWeight: "700" }}>SevaBuddy</h4>
-                <span style={{ fontSize: "10px", opacity: 0.8 }}>Live Civic Assistant</span>
-              </div>
+            <div>
+              <h4 style={{ margin: 0, fontSize: "14px", fontWeight: "700" }}>SevaBuddy</h4>
+              <span style={{ fontSize: "10px", opacity: 0.8 }}>Live Civic Assistant</span>
             </div>
             <button className="chatbot-close-btn" onClick={() => setIsOpen(false)}>
               <X size={16} />
