@@ -39,6 +39,7 @@ import PashuSetu from "./components/PashuSetu";
 import Crowdfund from "./components/Crowdfund";
 import SOS from "./components/SOS";
 import RewardsStore from "./components/RewardsStore";
+import Chatbot from "./components/Chatbot";
 
 export default function App() {
   // --- STATE SYSTEM ---
@@ -833,6 +834,24 @@ export default function App() {
           />
         )}
       </main>
+
+      {/* --- CUTE 3D CHATBOT --- */}
+      <Chatbot 
+        foods={foods}
+        drives={drives}
+        skills={skills}
+        crowd={crowd}
+        sosList={sosList}
+        meds={meds}
+        tutors={tutors}
+        tutorRequests={tutorRequests}
+        camps={camps}
+        clothes={clothes}
+        elderly={elderly}
+        trees={trees}
+        rescues={animalRescues}
+        user={user}
+      />
 
       {/* --- TOAST ALERTS OVERLAY --- */}
       <div className="toast-container">

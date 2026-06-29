@@ -953,3 +953,371 @@ select.form-control option {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
+
+/* --- CUTE 3D CHATBOT SYSTEM (SEVABUDDY) --- */
+#sevasetu-chatbot {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  font-family: 'Inter', sans-serif;
+}
+
+/* 3D Floating Avatar Button */
+.chatbot-avatar-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  outline: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.chatbot-avatar-btn:hover {
+  transform: scale(1.15) translateY(-4px);
+}
+
+/* Specular 3D Sphere styling */
+.chatbot-avatar-3d {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #a3e635 0%, #16a34a 40%, #15803d 70%, #0d530e 100%);
+  box-shadow: 
+    0 10px 25px rgba(13, 83, 14, 0.3),
+    inset 0 -8px 12px rgba(0, 0, 0, 0.4),
+    inset 0 4px 8px rgba(255, 255, 255, 0.6);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  animation: floatBot 3s ease-in-out infinite;
+  overflow: hidden;
+}
+
+/* Specular Highlight Gloss Layer */
+.specular-highlight {
+  position: absolute;
+  top: 4px;
+  left: 10px;
+  width: 20px;
+  height: 12px;
+  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 80%);
+  border-radius: 50%;
+  transform: rotate(-15deg);
+  pointer-events: none;
+}
+
+/* Digital Eyes System */
+.digital-eyes {
+  display: flex;
+  gap: 12px;
+  margin-top: -2px;
+  transition: transform 0.2s ease;
+}
+
+.digital-eyes.thinking {
+  animation: lookUpDown 1s ease-in-out infinite;
+}
+
+.digital-eyes.happy {
+  transform: translateY(-2px);
+}
+
+.eye {
+  width: 7px;
+  height: 10px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+  animation: blinkEyes 4s ease-in-out infinite;
+}
+
+/* Digital Mouth */
+.digital-mouth {
+  width: 14px;
+  height: 4px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  margin-top: 6px;
+  transition: all 0.2s ease;
+}
+
+.digital-mouth.happy {
+  height: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+}
+
+.digital-mouth.thinking {
+  width: 8px;
+  height: 2px;
+  border: none;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 1px;
+}
+
+/* Floating Shadow */
+.chatbot-avatar-shadow {
+  width: 32px;
+  height: 6px;
+  background: rgba(13, 83, 14, 0.15);
+  border-radius: 50%;
+  filter: blur(1px);
+  margin-top: 4px;
+  animation: scaleShadow 3s ease-in-out infinite;
+}
+
+/* Keyframe Animations */
+@keyframes floatBot {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes scaleShadow {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.7); opacity: 0.5; }
+}
+
+@keyframes blinkEyes {
+  0%, 95%, 100% { transform: scaleY(1); }
+  97% { transform: scaleY(0.1); }
+}
+
+@keyframes lookUpDown {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+}
+
+/* Chat Window Container */
+.chatbot-window {
+  width: 340px;
+  height: 480px;
+  border-radius: 20px;
+  background: rgba(251, 245, 221, 0.95); /* beige background */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(48, 109, 41, 0.25);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideInChat 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@keyframes slideInChat {
+  from { opacity: 0; transform: translateY(20px) scale(0.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Header */
+.chatbot-header {
+  padding: 16px;
+  background: linear-gradient(135deg, var(--color-green-medium), var(--color-green-dark));
+  color: var(--color-beige-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chatbot-header-3d-head {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #a3e635 0%, #16a34a 40%, #15803d 70%);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.specular-highlight-small {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  width: 10px;
+  height: 6px;
+  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 80%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.digital-eyes-small {
+  display: flex;
+  gap: 5px;
+}
+
+.eye-small {
+  width: 3px;
+  height: 5px;
+  background: white;
+  border-radius: 50%;
+}
+
+.chatbot-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-beige-light);
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chatbot-close-btn:hover {
+  opacity: 1;
+}
+
+/* Chat Messages */
+.chatbot-messages {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar for messages */
+.chatbot-messages::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chatbot-messages::-webkit-scrollbar-thumb {
+  background: var(--color-beige-dark);
+  border-radius: 2px;
+}
+
+.chat-bubble-container {
+  display: flex;
+  gap: 8px;
+  max-width: 85%;
+}
+
+.chat-bubble-container.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.chat-bubble-container.bot {
+  align-self: flex-start;
+}
+
+.chat-bubble-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-beige-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  border: 1px solid rgba(48, 109, 41, 0.25);
+}
+
+.chat-bubble {
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.chat-bubble.user {
+  background: var(--color-green-medium);
+  color: var(--color-beige-light);
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 2px 6px rgba(48, 109, 41, 0.15);
+}
+
+.chat-bubble.bot {
+  background: #ffffff;
+  color: var(--color-green-dark);
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(48, 109, 41, 0.1);
+}
+
+/* Typing Indicator Animation */
+.chat-bubble.bot.typing {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 18px;
+}
+
+.chat-bubble.bot.typing .dot {
+  width: 6px;
+  height: 6px;
+  background: var(--color-green-medium);
+  border-radius: 50%;
+  animation: typingDot 1.4s infinite both;
+}
+
+.chat-bubble.bot.typing .dot:nth-child(2) { animation-delay: 0.2s; }
+.chat-bubble.bot.typing .dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingDot {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* Input Area Form */
+.chatbot-input-area {
+  padding: 12px 16px;
+  background: #ffffff;
+  border-top: 1px solid rgba(48, 109, 41, 0.15);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.chatbot-input {
+  flex: 1;
+  border: 1px solid var(--color-beige-dark);
+  background: var(--color-beige-light);
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 12px;
+  color: var(--color-green-dark);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.chatbot-input:focus {
+  border-color: var(--color-green-medium);
+}
+
+.chatbot-send-btn {
+  background: var(--color-green-medium);
+  border: none;
+  color: var(--color-beige-light);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.chatbot-send-btn:hover {
+  background: var(--color-green-dark);
+  transform: scale(1.05);
+}
+
+.chatbot-send-btn:active {
+  transform: scale(0.95);
+}
