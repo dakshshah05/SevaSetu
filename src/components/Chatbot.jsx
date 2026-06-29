@@ -257,6 +257,80 @@ export default function Chatbot({
     }
   }, [messages, isTyping]);
 
+  // AI Nvidia NIM API RAG Query Call
+  const fetchNvidiaResponse = async (userMessage) => {
+    const apiKey = import.meta.env.VITE_NVIDIA_API_KEY;
+    if (!apiKey) return null;
+
+    try {
+      const systemPrompt = `You are SevaBuddy, a cute 3D chatbot helper for SevaSetu.
+Your mission is to answer questions using ONLY the live database context and website information below.
+If the user asks about anything unrelated to SevaSetu (e.g., general knowledge, math, coding, jokes, non-SevaSetu weather, politics, other apps), you MUST decline politely and tell them you can only assist with SevaSetu community queries.
+
+WEBSITE MODULES DESCRIPTION:
+- Ahaar Setu: Surplus food redistribution from restaurants to volunteer networks.
+- Swachh Setu: Sanitation drives with photo verification.
+- Sahaayak Setu: Volunteer rosters, NGO administrative Consoles, and skill-based micro-tasks.
+- Seva Rewards Store: Exchange volunteer points for discounts (Zepto, Swiggy, BookMyShow).
+- Punya Setu: Elder companionship requests and transparent Crowdfunding campaigns.
+- Swasthya Setu: Free medical camps and surplus medicine donation pool.
+- Shiksha Setu: Volunteer tutoring for children.
+- Vastra Setu: Clothes/essentials donation drives.
+- Vriksha Setu: Virtual forest sapling planting and labeling grid.
+- SOS: Emergency neighborhood disaster/flood broadcasts.
+
+LIVE COMMUNITY DATABASE STATE (JSON FORMAT):
+- User Session Profile: ${JSON.stringify(user)}
+- Emergency SOS Alerts: ${JSON.stringify(sosList.filter(s => s.status === 'active'))}
+- Surplus Food Alerts: ${JSON.stringify(foods.filter(f => f.status === 'pending'))}
+- Cleanup Drives: ${JSON.stringify(drives.filter(d => d.date >= new Date().toISOString().split('T')[0]))}
+- NGO Admin Tasks: ${JSON.stringify(skills.filter(s => s.status === 'open'))}
+- Children Tutoring Requests: ${JSON.stringify(tutorRequests.filter(r => r.status === 'pending'))}
+- Medical Camps Scheduled: ${JSON.stringify(camps.filter(c => c.status === 'scheduled'))}
+- Medicine Pool Stock: ${JSON.stringify(meds.filter(m => m.status === 'available'))}
+- Clothes Donations: ${JSON.stringify(clothes.filter(c => c.status === 'pending'))}
+- Seniors Help Requests: ${JSON.stringify(elderly.filter(e => e.status === 'pending'))}
+- Virtual Trees Planted: ${JSON.stringify(trees)}
+- Stray Animal Rescues: ${JSON.stringify(rescues.filter(r => r.status === 'reported'))}
+- Crowdfunding Campaigns: ${JSON.stringify(crowd)}
+
+CRITICAL RESPONSE INSTRUCTIONS:
+1. If the user query is off-topic, say: "🤖 I am SevaBuddy, a dedicated chatbot helper for SevaSetu. I am programmed to only answer questions regarding the SevaSetu platform, its civic modules, and our live database. Please ask a question related to SevaSetu community activities!"
+2. Format lists with clean Markdown bullet points.
+3. Be friendly, encouraging, and brief.`;
+
+      const response = await fetch(
+        "https://integrate.api.nvidia.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: "meta/llama-3.1-70b-instruct",
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userMessage }
+            ],
+            temperature: 0.2,
+            top_p: 0.7,
+            max_tokens: 1024
+          })
+        }
+      );
+
+      const data = await response.json();
+      if (data.choices && data.choices[0] && data.choices[0].message) {
+        return data.choices[0].message.content.trim();
+      }
+      return null;
+    } catch (err) {
+      console.error("Nvidia API Error, falling back:", err);
+      return null;
+    }
+  };
+
   // AI Gemini API RAG Query Call
   const fetchGeminiResponse = async (userMessage) => {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -517,10 +591,15 @@ CRITICAL RESPONSE INSTRUCTIONS:
     setInputText("");
     setIsTyping(true);
 
-    // 1. Try Gemini API first (RAG)
-    let replyText = await fetchGeminiResponse(userMsg.text);
+    // 1. Try Nvidia NIM first (RAG)
+    let replyText = await fetchNvidiaResponse(userMsg.text);
 
-    // 2. Fall back to local regex matching engine if no API Key or fetch error
+    // 2. Try Gemini API second (RAG)
+    if (!replyText) {
+      replyText = await fetchGeminiResponse(userMsg.text);
+    }
+
+    // 3. Fall back to local regex matching engine
     if (!replyText) {
       replyText = generateLocalResponse(userMsg.text);
     }
