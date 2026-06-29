@@ -8,7 +8,8 @@ export default function ShikshaSetu({
   tutorRequests, 
   onRegisterTutor, 
   onCreateTutorRequest, 
-  onMatchTutorToRequest 
+  onMatchTutorToRequest,
+  onUpgradeToVolunteer
 }) {
   const [activeTab, setActiveTab] = useState("requests");
   const [tutorModal, setTutorModal] = useState(false);
@@ -53,6 +54,9 @@ export default function ShikshaSetu({
         {user?.role === "volunteer" && (
           <button className="btn btn-primary" onClick={() => setTutorModal(true)}><Plus size={14} /> Register as Volunteer Tutor</button>
         )}
+        {user?.role === "user" && (
+          <button className="btn btn-secondary" onClick={onUpgradeToVolunteer} style={{ backgroundColor: "var(--color-green-dark)", color: "#fff" }}><Plus size={14} /> Register as Volunteer to Tutor</button>
+        )}
         <button className="btn btn-secondary" onClick={() => setRequestModal(true)}><Plus size={14} /> Submit Tutoring Request for a Child</button>
       </div>
 
@@ -76,6 +80,11 @@ export default function ShikshaSetu({
                   {req.status === "pending" && user?.role === "volunteer" && (
                     <button className="btn btn-primary" onClick={() => onMatchTutorToRequest(req.id, user.name)} style={{ padding: "6px 12px", fontSize: "11px", marginTop: "10px" }}>
                       <Check size={12} /> Claim Tutoring Slot
+                    </button>
+                  )}
+                  {req.status === "pending" && user?.role === "user" && (
+                    <button className="btn btn-secondary" onClick={onUpgradeToVolunteer} style={{ padding: "6px 12px", fontSize: "11px", marginTop: "10px", backgroundColor: "var(--color-green-dark)", color: "#fff" }}>
+                      Register as Volunteer to Claim
                     </button>
                   )}
                 </div>

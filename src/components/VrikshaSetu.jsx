@@ -3,9 +3,11 @@ import { createPortal } from "react-dom";
 import { Plus, Calendar, MapPin, Sprout } from "lucide-react";
 
 export default function VrikshaSetu({ 
+  user,
   trees, 
   onPlantTree, 
-  onUpdateTree 
+  onUpdateTree,
+  onUpgradeToVolunteer
 }) {
   const [activeTab, setActiveTab] = useState("forest");
   const [plantModal, setPlantModal] = useState(false);
@@ -64,7 +66,11 @@ export default function VrikshaSetu({
         <div style={{ display: "flex", flexDirection: "column", gap: "20px", marginTop: "16px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
             <h4>Virtual Canopy Growth Grid</h4>
-            <button className="btn btn-primary" onClick={() => setPlantModal(true)}><Plus size={14} /> Plant / Name a Sapling</button>
+            {user?.role === "volunteer" ? (
+              <button className="btn btn-primary" onClick={() => setPlantModal(true)}><Plus size={14} /> Plant / Name a Sapling</button>
+            ) : user?.role === "user" ? (
+              <button className="btn btn-secondary" onClick={onUpgradeToVolunteer} style={{ backgroundColor: "var(--color-green-dark)", color: "#fff" }}><Plus size={14} /> Register as Volunteer to Plant</button>
+            ) : null}
           </div>
 
           {/* Virtual tree grid display */}
@@ -92,9 +98,15 @@ export default function VrikshaSetu({
                 <span className="badge badge-pending" style={{ fontSize: "8px", marginTop: "8px", padding: "2px 6px" }}>{tree.status}</span>
                 
                 <div style={{ display: "flex", gap: "4px", marginTop: "10px", width: "100%" }}>
-                  <button className="btn btn-outline" onClick={() => handleOpenGrowth(tree.id)} style={{ flex: 1, padding: "2px", fontSize: "9px" }}>
-                    Update
-                  </button>
+                  {user?.role === "volunteer" ? (
+                    <button className="btn btn-outline" onClick={() => handleOpenGrowth(tree.id)} style={{ flex: 1, padding: "2px", fontSize: "9px" }}>
+                      Update
+                    </button>
+                  ) : user?.role === "user" ? (
+                    <button className="btn btn-outline" onClick={onUpgradeToVolunteer} style={{ flex: 1, padding: "2px", fontSize: "9px" }}>
+                      Become Volunteer to Update
+                    </button>
+                  ) : null}
                 </div>
               </div>
             ))}
@@ -115,7 +127,11 @@ export default function VrikshaSetu({
               <div style={{ display: "flex", alignItems: "center", gap: "4px" }}><Calendar size={14} /> <span>Saturday at 08:30 AM</span></div>
               <div style={{ display: "flex", alignItems: "center", gap: "4px" }}><MapPin size={14} /> <span>Koramangala Lake Entry</span></div>
             </div>
-            <button className="btn btn-primary" onClick={() => setPlantModal(true)}>Register & Plant tree</button>
+            {user?.role === "volunteer" ? (
+              <button className="btn btn-primary" onClick={() => setPlantModal(true)}>Register & Plant tree</button>
+            ) : user?.role === "user" ? (
+              <button className="btn btn-secondary" onClick={onUpgradeToVolunteer} style={{ backgroundColor: "var(--color-green-dark)", color: "#fff" }}>Register as Volunteer to Plant</button>
+            ) : null}
           </div>
         </div>
       )}

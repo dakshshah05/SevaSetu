@@ -7,7 +7,8 @@ export default function VastraSetu({
   clothes, 
   onListDonation, 
   onClaimPickup, 
-  onDistribute 
+  onDistribute,
+  onUpgradeToVolunteer
 }) {
   const [activeTab, setActiveTab] = useState("all");
   const [donateModal, setDonateModal] = useState(false);
@@ -91,6 +92,9 @@ export default function VastraSetu({
             <div style={{ marginTop: "20px" }}>
               {c.status === "pending" && user?.role === "volunteer" && (
                 <button className="btn btn-primary" onClick={() => onClaimPickup(c.id)} style={{ width: "100%" }}><Truck size={14} style={{ marginRight: "6px" }} /> Claim Pickup Slot</button>
+              )}
+              {c.status === "pending" && user?.role === "user" && (
+                <button className="btn btn-secondary" onClick={onUpgradeToVolunteer} style={{ width: "100%", backgroundColor: "var(--color-green-dark)", color: "#fff" }}><Truck size={14} style={{ marginRight: "6px" }} /> Register as Volunteer to Claim</button>
               )}
               {c.status === "claimed" && c.claimedBy === user?.uid && (
                 <button className="btn btn-secondary" onClick={() => handleOpenDistribute(c.id)} style={{ width: "100%" }}><Check size={14} /> Mark Distributed</button>

@@ -119,6 +119,7 @@ export default function AhaarSetu({
   user, 
   foods, 
   triggerToast,
+  onUpgradeToVolunteer,
   onAddPickup, 
   onClaimPickup, 
   onCompletePickup 
@@ -328,6 +329,9 @@ export default function AhaarSetu({
                     <div style={{ marginTop: "auto", display: "flex", gap: "8px" }}>
                       {f.status === "pending" && user?.role === "volunteer" && (
                         <button className="btn btn-primary" onClick={() => onClaimPickup(f.id)} style={{ width: "100%" }}><Check size={12} /> Claim Route</button>
+                      )}
+                      {f.status === "pending" && user?.role === "user" && (
+                        <button className="btn btn-secondary" onClick={onUpgradeToVolunteer} style={{ width: "100%" }}>Register as Volunteer to Claim</button>
                       )}
                       {f.status === "claimed" && f.claimedBy === user?.uid && (
                         <button className="btn btn-primary" onClick={() => triggerCompleteClick(f)} style={{ width: "100%" }}><Check size={12} /> Mark Distributed</button>

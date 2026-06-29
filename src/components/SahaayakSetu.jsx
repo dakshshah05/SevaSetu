@@ -11,7 +11,8 @@ export default function SahaayakSetu({
   onApproveProof,
   onCreateSkillTask,
   onApplySkillTask,
-  onCompleteSkillTask
+  onCompleteSkillTask,
+  onUpgradeToVolunteer
 }) {
   const [activeNgoTab, setActiveNgoTab] = useState("directory");
   const [skillModal, setSkillModal] = useState(false);
@@ -101,7 +102,7 @@ export default function SahaayakSetu({
                   </div>
                 </div>
 
-                {user?.role === "volunteer" && (
+                {user?.role === "volunteer" ? (
                   <button 
                     className={`btn ${isMyNGO ? "btn-secondary" : "btn-primary"}`} 
                     onClick={() => !isMyNGO && onJoinNGO(ngo.id)}
@@ -110,7 +111,15 @@ export default function SahaayakSetu({
                   >
                     {isMyNGO ? "Joined Partner Roster" : "Enlist as Volunteer"}
                   </button>
-                )}
+                ) : user?.role === "user" ? (
+                  <button 
+                    className="btn btn-secondary" 
+                    onClick={onUpgradeToVolunteer}
+                    style={{ width: "100%", fontSize: "12px", backgroundColor: "var(--color-green-dark)", color: "#fff" }}
+                  >
+                    Register as Volunteer to Enlist
+                  </button>
+                ) : null}
               </div>
             );
           })}
@@ -159,6 +168,9 @@ export default function SahaayakSetu({
                     <div style={{ marginTop: "16px" }}>
                       {t.status === "open" && user?.role === "volunteer" && (
                         <button className="btn btn-primary" onClick={() => onApplySkillTask(t.id)} style={{ width: "100%", fontSize: "12px" }}>Claim Work</button>
+                      )}
+                      {t.status === "open" && user?.role === "user" && (
+                        <button className="btn btn-secondary" onClick={onUpgradeToVolunteer} style={{ width: "100%", fontSize: "12px", backgroundColor: "var(--color-green-dark)", color: "#fff" }}>Register as Volunteer to Claim</button>
                       )}
                       {t.status === "assigned" && isMine && (
                         <button className="btn btn-secondary" onClick={() => handleOpenComplete(t.id)} style={{ width: "100%", fontSize: "12px" }}>Submit Deliverable Link</button>

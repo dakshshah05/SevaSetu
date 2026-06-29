@@ -11,7 +11,8 @@ export default function Dashboard({
   clothes, 
   rescues,
   tutors,
-  triggerToast
+  triggerToast,
+  onUpgradeToVolunteer
 }) {
   const [activeLeaderboardTab, setActiveLeaderboardTab] = useState("volunteers");
   const [csrClaimed, setCsrClaimed] = useState(false);
@@ -80,7 +81,7 @@ export default function Dashboard({
         <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
           
           {/* Gamification Panel */}
-          {user && (
+          {user && user.role !== "user" && (
             <div className="card card-teal">
               <div className="info-header">
                 <h3><Trophy size={18} style={{ marginRight: "8px", verticalAlign: "middle" }} /> Volunteer Gamification Tier</h3>
@@ -108,6 +109,21 @@ export default function Dashboard({
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Become a Volunteer Upgrade Panel for Citizens */}
+          {user && user.role === "user" && (
+            <div className="card card-teal">
+              <div className="info-header">
+                <h3><Award size={18} style={{ marginRight: "8px", verticalAlign: "middle" }} /> Become an Active Volunteer</h3>
+              </div>
+              <p style={{ fontSize: "14px", color: "var(--text-secondary)", marginBottom: "20px" }}>
+                You are currently registered as a Citizen (Normal User). Join our active civic network to claim food pickups, participate in cleaning drives, help senior citizens, and earn Seva Reward points!
+              </p>
+              <button className="btn btn-primary" onClick={onUpgradeToVolunteer} style={{ width: "fit-content" }}>
+                Register as Volunteer
+              </button>
             </div>
           )}
 

@@ -7,7 +7,8 @@ export default function PashuSetu({
   rescues, 
   triggerToast,
   onReportInjury, 
-  onClaimRescue 
+  onClaimRescue,
+  onUpgradeToVolunteer
 }) {
   const [activeTab, setActiveTab] = useState("rescues");
   const [reportModal, setReportModal] = useState(false);
@@ -95,6 +96,11 @@ export default function PashuSetu({
                   {r.status === "reported" && user?.role === "volunteer" && (
                     <button className="btn btn-primary" onClick={() => onClaimRescue(r.id, user.name)} style={{ width: "100%" }}>
                       <Check size={12} style={{ marginRight: "6px" }} /> Dispatch to Rescue Location
+                    </button>
+                  )}
+                  {r.status === "reported" && user?.role === "user" && (
+                    <button className="btn btn-secondary" onClick={onUpgradeToVolunteer} style={{ width: "100%", backgroundColor: "var(--color-green-dark)", color: "#fff" }}>
+                      Register as Volunteer to Dispatch
                     </button>
                   )}
                 </div>

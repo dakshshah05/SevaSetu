@@ -11,7 +11,8 @@ export default function SwasthyaSetu({
   onRegisterPatient, 
   onSubmitReport, 
   onDonateMedicine, 
-  onClaimMedicine 
+  onClaimMedicine,
+  onUpgradeToVolunteer
 }) {
   const [activeTab, setActiveTab] = useState("camps");
   const [campModal, setCampModal] = useState(false);
@@ -115,6 +116,9 @@ export default function SwasthyaSetu({
                   {c.status === "scheduled" && user?.role === "volunteer" && (
                     <button className="btn btn-primary" onClick={() => onRegisterDoctor(c.id, user.name)}>Enlist as Doctor / Student Clinic Helper</button>
                   )}
+                  {c.status === "scheduled" && user?.role === "user" && (
+                    <button className="btn btn-secondary" onClick={onUpgradeToVolunteer} style={{ backgroundColor: "var(--color-green-dark)", color: "#fff" }}>Register as Volunteer to Enlist</button>
+                  )}
                   {c.status === "scheduled" && (
                     <button className="btn btn-secondary" onClick={() => handleOpenPatient(c.id)}>Register Patient Token</button>
                   )}
@@ -156,6 +160,9 @@ export default function SwasthyaSetu({
                   
                   {(user?.role === "ngo" || user?.role === "volunteer") && (
                     <button className="btn btn-primary" onClick={() => onClaimMedicine(m.id)} style={{ width: "100%", marginTop: "15px" }}><Check size={14} /> Claim Medicine</button>
+                  )}
+                  {user?.role === "user" && (
+                    <button className="btn btn-secondary" onClick={onUpgradeToVolunteer} style={{ width: "100%", marginTop: "15px", backgroundColor: "var(--color-green-dark)", color: "#fff" }}><Check size={14} /> Register as Volunteer to Claim</button>
                   )}
                 </div>
               ))

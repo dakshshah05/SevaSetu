@@ -13,7 +13,10 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+  signInWithPopup,
+  GoogleAuthProvider
 } from "firebase/auth";
 
 // --- CRYPTOGRAPHY: SHA-256 HASHING & AES/XOR TRANS-PORTABLE ENCRYPTION ---
@@ -424,6 +427,86 @@ export const DB = {
         return found;
       }
       throw new Error("User credentials not found locally.");
+    }
+  },
+
+  async forgotPassword(email) {
+    if (isConfigValid) {
+      await sendPasswordResetEmail(auth, email);
+    } else {
+      const users = JSON.parse(localStorage.getItem("sevasetu_users") || "[]");
+      const found = users.find(u => u.email === email);
+      if (!found) {
+        throw new Error("No account associated with this email address.");
+      }
+      console.log(`Mock reset password email sent to ${email}`);
+    }
+    return true;
+  },
+
+  async loginWithGoogle(role = "user") {
+    if (isConfigValid) {
+      const provider = new GoogleAuthProvider();
+      const creds = await signInWithPopup(auth, provider);
+      const userRef = doc(db, "users", creds.user.uid);
+      const snap = await getDoc(userRef);
+      let userData;
+      if (snap.exists()) {
+        userData = { uid: creds.user.uid, ...snap.data() };
+      } else {
+        const name = creds.user.displayName || "Google User";
+        const email = creds.user.email;
+        const userPayload = {
+          name,
+          email,
+          role,
+          completedCount: 0
+        };
+        if (role === "volunteer") {
+          userPayload.rewardPoints = 0;
+          userPayload.impactHours = 0;
+          userPayload.ngoId = "";
+        } else if (role === "restaurant") {
+          userPayload.sevaPoints = 0;
+          userPayload.address = "";
+        }
+        await setDoc(userRef, userPayload);
+        userData = { uid: creds.user.uid, ...userPayload };
+      }
+      currentLoggedInUser = userData;
+      localStorage.setItem("sevasetu_current_user", JSON.stringify(userData));
+      return userData;
+    } else {
+      const name = prompt("Enter mock user display name:", "Google User Mock") || "Google User Mock";
+      const email = prompt("Enter mock user email:", "googleuser@gmail.com");
+      if (!email) throw new Error("Google login cancelled.");
+      const users = JSON.parse(localStorage.getItem("sevasetu_users") || "[]");
+      let found = users.find(u => u.email === email);
+      if (!found) {
+        const newUid = "uid_google_" + Math.random().toString(36).substr(2, 9);
+        const userPayload = {
+          name,
+          email,
+          role,
+          completedCount: 0
+        };
+        if (role === "volunteer") {
+          userPayload.rewardPoints = 0;
+          userPayload.impactHours = 0;
+          userPayload.ngoId = "";
+        } else if (role === "restaurant") {
+          userPayload.sevaPoints = 0;
+          userPayload.address = "";
+        }
+        found = { uid: newUid, ...userPayload };
+        users.push(found);
+        localStorage.setItem("sevasetu_users", JSON.stringify(users));
+        notifySubscribers("users", users);
+      }
+      currentLoggedInUser = found;
+      localStorage.setItem("sevasetu_current_user", JSON.stringify(found));
+      authChangeListeners.forEach(cb => cb(found));
+      return found;
     }
   },
 
@@ -1551,5 +1634,35 @@ export const DB = {
         }
       }
     }
+  },
+
+  async upgradeToVolunteer() {
+    if (!currentLoggedInUser) throw new Error("No user is currently logged in.");
+    if (isConfigValid) {
+      const volRef = doc(db, "users", currentLoggedInUser.uid);
+      await updateDoc(volRef, {
+        role: "volunteer",
+        rewardPoints: 0,
+        completedCount: 0,
+        impactHours: 0,
+        ngoId: ""
+      });
+      const snap = await getDoc(volRef);
+      this.triggerProfileSync({ uid: currentLoggedInUser.uid, ...snap.data() });
+    } else {
+      const users = JSON.parse(localStorage.getItem("sevasetu_users") || "[]");
+      const idx = users.findIndex(u => u.uid === currentLoggedInUser.uid);
+      if (idx !== -1) {
+        users[idx].role = "volunteer";
+        users[idx].rewardPoints = 0;
+        users[idx].completedCount = 0;
+        users[idx].impactHours = 0;
+        users[idx].ngoId = "";
+        localStorage.setItem("sevasetu_users", JSON.stringify(users));
+        this.triggerProfileSync(users[idx]);
+        notifySubscribers("users", users);
+      }
+    }
   }
 }
+

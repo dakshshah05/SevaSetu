@@ -6,7 +6,8 @@ export default function SOS({
   user,
   sosList,
   onBroadcastSOS,
-  onResolveSOS
+  onResolveSOS,
+  onUpgradeToVolunteer
 }) {
   const [sosModal, setSosModal] = useState(false);
   const [sosForm, setSosForm] = useState({ title: "", description: "", severity: "high", location: "" });
@@ -67,6 +68,11 @@ export default function SOS({
                 {(user?.role === "ngo" || user?.role === "volunteer") && (
                   <button className="btn btn-primary" onClick={() => onResolveSOS(sos.id)} style={{ width: "100%", padding: "6px 12px", fontSize: "12px", marginTop: "6px" }}>
                     <Check size={12} style={{ marginRight: "4px" }} /> Mark Resolved / Dispatched
+                  </button>
+                )}
+                {user?.role === "user" && (
+                  <button className="btn btn-secondary" onClick={onUpgradeToVolunteer} style={{ width: "100%", padding: "6px 12px", fontSize: "12px", marginTop: "6px", backgroundColor: "var(--color-green-dark)", color: "#fff" }}>
+                    Register as Volunteer to Resolve
                   </button>
                 )}
               </div>

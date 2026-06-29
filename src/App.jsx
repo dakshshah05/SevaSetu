@@ -75,6 +75,7 @@ export default function App() {
   // Form Inputs State
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [registerForm, setRegisterForm] = useState({ name: "", email: "", password: "", role: "volunteer", address: "", description: "" });
+  const [forgotEmail, setForgotEmail] = useState("");
 
   // Top Taskbar Scroll State
   const [scrolled, setScrolled] = useState(false);
@@ -255,10 +256,39 @@ export default function App() {
     }
   };
 
+  const handleForgotSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await DB.forgotPassword(forgotEmail);
+      triggerToast("Password reset link sent to your email!");
+      setAuthTab("login");
+      setForgotEmail("");
+    } catch (err) {
+      triggerToast(err.message, true);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const role = authTab === "register" ? registerForm.role : "user";
+      const u = await DB.loginWithGoogle(role);
+      triggerToast(`Welcome back, ${u.name}! Logged in via Google.`);
+      setAuthModal(false);
+    } catch (err) {
+      triggerToast(err.message, true);
+    }
+  };
+
   const handleLogoutClick = async () => {
     await DB.logout();
     triggerToast("Logged out successfully.");
     setActiveView("dashboard");
+  };
+
+  const handleUpgradeToVolunteer = () => {
+    DB.upgradeToVolunteer()
+      .then(() => triggerToast("Congratulations! You are now registered as a Volunteer."))
+      .catch(err => triggerToast(err.message, true));
   };
 
   const activeSOS = sosList.filter(s => s.status === "active");
@@ -501,6 +531,7 @@ export default function App() {
           <Dashboard 
             user={user}
             triggerToast={triggerToast}
+            onUpgradeToVolunteer={handleUpgradeToVolunteer}
             foods={foods}
             drives={drives}
             sosList={sosList}
@@ -517,6 +548,7 @@ export default function App() {
           <AhaarSetu
             user={user}
             foods={foods}
+            onUpgradeToVolunteer={handleUpgradeToVolunteer}
             onAddPickup={(foodType, quantity, expiryTime, location) => 
               DB.createFoodPickup(foodType, quantity, expiryTime, location)
                 .then(() => triggerToast("Surplus food alert broadcasted!"))
@@ -539,6 +571,7 @@ export default function App() {
           <SwachhSetu
             user={user}
             drives={drives}
+            onUpgradeToVolunteer={handleUpgradeToVolunteer}
             onAddDrive={(title, description, date, time, location, points) => 
               DB.createCleanupDrive(title, description, date, time, location, points)
                 .then(() => triggerToast("Cleanup campaign announced!"))
@@ -568,6 +601,7 @@ export default function App() {
             leaderboard={leaderboard}
             drives={drives}
             skills={skills}
+            onUpgradeToVolunteer={handleUpgradeToVolunteer}
             onJoinNGO={(ngoId) => 
               DB.joinNGO(ngoId)
                 .then(() => triggerToast("Successfully joined NGO roster!"))
@@ -601,6 +635,7 @@ export default function App() {
             user={user}
             tutors={tutors}
             tutorRequests={tutorRequests}
+            onUpgradeToVolunteer={handleUpgradeToVolunteer}
             onRegisterTutor={(subject, availability, location) => 
               DB.registerTutor(subject, availability, location)
                 .then(() => triggerToast("Tutor registration successful!"))
@@ -624,6 +659,7 @@ export default function App() {
             user={user}
             camps={camps}
             meds={meds}
+            onUpgradeToVolunteer={handleUpgradeToVolunteer}
             onCreateCamp={(title, location, date, description) => 
               DB.createMedicalCamp(title, location, date, description)
                 .then(() => triggerToast("Free medical camp scheduled!"))
@@ -661,6 +697,7 @@ export default function App() {
           <VastraSetu
             user={user}
             clothes={clothes}
+            onUpgradeToVolunteer={handleUpgradeToVolunteer}
             onListDonation={(category, details, quantity) => 
               DB.listClothesDonation(category, details, quantity)
                 .then(() => triggerToast("Donation listing registered!"))
@@ -683,6 +720,7 @@ export default function App() {
           <PunyaSetu
             user={user}
             triggerToast={triggerToast}
+            onUpgradeToVolunteer={handleUpgradeToVolunteer}
             elderly={elderly}
             visits={elderlyVisits}
             onRequestHelper={(elderlyName, age, helperType, location, details) => 
@@ -707,6 +745,7 @@ export default function App() {
           <VrikshaSetu
             user={user}
             trees={trees}
+            onUpgradeToVolunteer={handleUpgradeToVolunteer}
             onPlantTree={(driveTitle, location, treeName) => 
               DB.plantVirtualTree(driveTitle, location, treeName)
                 .then(() => triggerToast("Virtual tree sapling registered!"))
@@ -724,6 +763,7 @@ export default function App() {
           <PashuSetu
             user={user}
             triggerToast={triggerToast}
+            onUpgradeToVolunteer={handleUpgradeToVolunteer}
             rescues={animalRescues}
             onReportInjury={(animalType, injuryDetails, location, photoUrl) => 
               DB.reportAnimalInjury(animalType, injuryDetails, location, photoUrl)
@@ -765,6 +805,7 @@ export default function App() {
           <SOS
             user={user}
             sosList={sosList}
+            onUpgradeToVolunteer={handleUpgradeToVolunteer}
             onBroadcastSOS={(title, description, severity, location) => 
               DB.broadcastSOS(title, description, severity, location)
                 .then(() => triggerToast("SOS broadcasted successfully!", true))
@@ -816,26 +857,88 @@ export default function App() {
         <div className="modal-overlay" onClick={() => setAuthModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{authTab === "login" ? "Sign In" : "Create Account"}</h3>
+              <h3>
+                {authTab === "login" && "Sign In"}
+                {authTab === "register" && "Create Account"}
+                {authTab === "forgot" && "Reset Password"}
+              </h3>
               <button className="modal-close" onClick={() => setAuthModal(false)}>×</button>
             </div>
             <div className="modal-body">
-              <div className="tab-group" style={{ justifyContent: "center", marginBottom: "20px" }}>
-                <button className={`tab-btn ${authTab === "login" ? "active" : ""}`} onClick={() => setAuthTab("login")}>Sign In</button>
-                <button className={`tab-btn ${authTab === "register" ? "active" : ""}`} onClick={() => setAuthTab("register")}>Create Account</button>
-              </div>
+              {authTab !== "forgot" && (
+                <div className="tab-group" style={{ justifyContent: "center", marginBottom: "20px" }}>
+                  <button className={`tab-btn ${authTab === "login" ? "active" : ""}`} onClick={() => setAuthTab("login")}>Sign In</button>
+                  <button className={`tab-btn ${authTab === "register" ? "active" : ""}`} onClick={() => setAuthTab("register")}>Create Account</button>
+                </div>
+              )}
 
-              {authTab === "login" ? (
+              {authTab === "forgot" ? (
+                <form onSubmit={handleForgotSubmit}>
+                  <p style={{ fontSize: "12px", color: "var(--text-secondary)", marginBottom: "16px", textAlign: "center" }}>
+                    Enter your registered email address below, and we'll send you instructions to reset your password.
+                  </p>
+                  <div className="form-group">
+                    <label>Email Address</label>
+                    <input 
+                      type="email" 
+                      className="form-control" 
+                      placeholder="name@domain.com" 
+                      value={forgotEmail} 
+                      onChange={e => setForgotEmail(e.target.value)} 
+                      required 
+                    />
+                  </div>
+                  <button type="submit" className="btn btn-primary" style={{ width: "100%", marginTop: "10px" }}>Send Reset Link</button>
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary" 
+                    onClick={() => setAuthTab("login")} 
+                    style={{ width: "100%", marginTop: "8px" }}
+                  >
+                    Back to Sign In
+                  </button>
+                </form>
+              ) : authTab === "login" ? (
                 <form onSubmit={handleLoginSubmit}>
                   <div className="form-group">
                     <label>Email Address</label>
                     <input type="email" className="form-control" placeholder="name@domain.com" value={loginForm.email} onChange={e => setLoginForm({...loginForm, email: e.target.value})} required />
                   </div>
                   <div className="form-group">
-                    <label>Password</label>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <label style={{ margin: 0 }}>Password</label>
+                      <button 
+                        type="button" 
+                        onClick={() => setAuthTab("forgot")} 
+                        style={{ background: "none", border: "none", color: "var(--color-green-dark)", fontSize: "11px", cursor: "pointer", padding: 0 }}
+                      >
+                        Forgot Password?
+                      </button>
+                    </div>
                     <input type="password" className="form-control" placeholder="••••••••" value={loginForm.password} onChange={e => setLoginForm({...loginForm, password: e.target.value})} required />
                   </div>
                   <button type="submit" className="btn btn-primary" style={{ width: "100%", marginTop: "10px" }}><LogIn size={14} /> Log In</button>
+                  
+                  <div className="auth-separator" style={{ display: "flex", alignItems: "center", margin: "16px 0", fontSize: "11px", color: "var(--text-secondary)" }}>
+                    <div style={{ flex: 1, height: "1px", background: "var(--color-beige-dark)" }}></div>
+                    <span style={{ padding: "0 8px" }}>OR</span>
+                    <div style={{ flex: 1, height: "1px", background: "var(--color-beige-dark)" }}></div>
+                  </div>
+                  
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary" 
+                    onClick={handleGoogleLogin} 
+                    style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid var(--color-beige-dark)", background: "#fff", color: "var(--text-primary)" }}
+                  >
+                    <svg viewBox="0 0 24 24" width="16" height="16" style={{ marginRight: '8px' }}>
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22c-.62-.62-1.07-1.42-1.07-2.63z"/>
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    Sign in with Google
+                  </button>
                 </form>
               ) : (
                 <form onSubmit={handleRegisterSubmit}>
@@ -850,6 +953,7 @@ export default function App() {
                   <div className="form-group">
                     <label>Account Role Type</label>
                     <select className="form-control" value={registerForm.role} onChange={e => setRegisterForm({...registerForm, role: e.target.value})} required>
+                      <option value="user">Citizen (Donor/Guest)</option>
                       <option value="volunteer">Volunteer (Citizen)</option>
                       <option value="ngo">NGO Administrator</option>
                       <option value="restaurant">Restaurant Owner</option>
@@ -872,6 +976,27 @@ export default function App() {
                     </div>
                   )}
                   <button type="submit" className="btn btn-primary" style={{ width: "100%", marginTop: "10px" }}><UserPlus size={14} /> Create Account</button>
+                  
+                  <div className="auth-separator" style={{ display: "flex", alignItems: "center", margin: "16px 0", fontSize: "11px", color: "var(--text-secondary)" }}>
+                    <div style={{ flex: 1, height: "1px", background: "var(--color-beige-dark)" }}></div>
+                    <span style={{ padding: "0 8px" }}>OR</span>
+                    <div style={{ flex: 1, height: "1px", background: "var(--color-beige-dark)" }}></div>
+                  </div>
+                  
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary" 
+                    onClick={handleGoogleLogin} 
+                    style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid var(--color-beige-dark)", background: "#fff", color: "var(--text-primary)" }}
+                  >
+                    <svg viewBox="0 0 24 24" width="16" height="16" style={{ marginRight: '8px' }}>
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22c-.62-.62-1.07-1.42-1.07-2.63z"/>
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    Sign in with Google
+                  </button>
                 </form>
               )}
             </div>

@@ -9,7 +9,8 @@ export default function PunyaSetu({
   triggerToast,
   onRequestHelper, 
   onClaimHelp, 
-  onLogVisit 
+  onLogVisit,
+  onUpgradeToVolunteer
 }) {
   const [activeTab, setActiveTab] = useState("requests");
   const [requestModal, setRequestModal] = useState(false);
@@ -96,6 +97,11 @@ export default function PunyaSetu({
                   {eld.status === "pending" && user?.role === "volunteer" && (
                     <button className="btn btn-primary" onClick={() => onClaimHelp(eld.id)} style={{ padding: "6px 12px", fontSize: "11px", marginTop: "10px" }}>
                       Enlist as Helper
+                    </button>
+                  )}
+                  {eld.status === "pending" && user?.role === "user" && (
+                    <button className="btn btn-secondary" onClick={onUpgradeToVolunteer} style={{ padding: "6px 12px", fontSize: "11px", marginTop: "10px", backgroundColor: "var(--color-green-dark)", color: "#fff" }}>
+                      Register as Volunteer to Help
                     </button>
                   )}
                   {eld.status === "assigned" && eld.helperId === user?.uid && (

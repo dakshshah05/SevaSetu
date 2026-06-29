@@ -8,7 +8,8 @@ export default function SwachhSetu({
   onAddDrive, 
   onJoinDrive, 
   onSubmitProof, 
-  onApproveProof 
+  onApproveProof,
+  onUpgradeToVolunteer
 }) {
   const [driveModal, setDriveModal] = useState(false);
   const [proofModal, setProofModal] = useState(false);
@@ -170,6 +171,11 @@ export default function SwachhSetu({
                   <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
                     {!d.participants.includes(user?.uid) && user?.role === "volunteer" && (
                       <button className="btn btn-primary" onClick={() => onJoinDrive(d.id)} style={{ flex: 1 }}>Join Drive</button>
+                    )}
+                    {user?.role === "user" && (
+                      <button className="btn btn-secondary" onClick={onUpgradeToVolunteer} style={{ flex: 1, backgroundColor: "var(--color-green-dark)", color: "#fff" }}>
+                        Register as Volunteer to Join
+                      </button>
                     )}
                     {d.participants.includes(user?.uid) && (
                       <button className="btn btn-secondary" onClick={() => handleOpenProof(d.id)} style={{ flex: 1 }}><Upload size={12} /> Submit Before/After Proof</button>
