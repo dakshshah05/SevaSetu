@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { MessageSquare, Send, X, Bot, User } from "lucide-react";
+import * as THREE from "three";
+import { Send, X } from "lucide-react";
 
 export default function Chatbot({
   foods = [],
@@ -22,13 +23,244 @@ export default function Chatbot({
     {
       id: "welcome",
       sender: "bot",
-      text: "👋 Hi! I am SevaBuddy, your cute 3D civic assistant. I can help you search live database listings, upcoming cleanup drives, food alerts, or emergency SOS coordinates. Ask me anything!"
+      text: "👋 Hi! I am SevaBuddy, your cute 3D civic assistant. I can search live database listings (food pickups, cleanup drives, active SOS coordinates, trees planted, stray animal rescues) and answer questions about the SevaSetu platform. How can I help you today?"
     }
   ]);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [botMood, setBotMood] = useState("normal"); // normal, happy, thinking
   const chatEndRef = useRef(null);
+  const canvasRef = useRef(null);
+
+  // 3D Three.js Interactive Robot Setup
+  useEffect(() => {
+    if (isOpen || !canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const width = canvas.clientWidth || 80;
+    const height = canvas.clientHeight || 80;
+
+    // 1. Scene & Camera
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
+    camera.position.set(0, 0, 4.5);
+
+    // 2. Renderer
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      alpha: true,
+      antialias: true
+    });
+    renderer.setSize(width, height, false);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    // 3. Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
+    dirLight.position.set(3, 4, 3);
+    scene.add(dirLight);
+
+    // Subtle green bounce light from bottom
+    const greenBounceLight = new THREE.DirectionalLight(0x22c55e, 0.5);
+    greenBounceLight.position.set(-2, -4, -1);
+    scene.add(greenBounceLight);
+
+    const chestLight = new THREE.PointLight(0xa3e635, 2.5, 4);
+    chestLight.position.set(0, -0.2, 0.5);
+    scene.add(chestLight);
+
+    // 4. Materials
+    const whitePlastic = new THREE.MeshStandardMaterial({
+      color: 0xf3f4f6, // bright greyish white
+      roughness: 0.15,
+      metalness: 0.05
+    });
+
+    const darkScreen = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      roughness: 0.08,
+      metalness: 0.7
+    });
+
+    const greenTrim = new THREE.MeshStandardMaterial({
+      color: 0x15803d, // SevaSetu Green
+      roughness: 0.2,
+      metalness: 0.2
+    });
+
+    const eyeMaterial = new THREE.MeshBasicMaterial({
+      color: 0x0f172a
+    });
+
+    const eyeHighlightMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffffff
+    });
+
+    const glowMaterial = new THREE.MeshBasicMaterial({
+      color: 0xa3e635
+    });
+
+    // 5. Robot Group Assembly
+    const robot = new THREE.Group();
+
+    // Body (chubby egg shape)
+    const bodyGeo = new THREE.SphereGeometry(0.55, 32, 32);
+    const body = new THREE.Mesh(bodyGeo, whitePlastic);
+    body.scale.set(1, 1.15, 0.95);
+    body.position.y = -0.45;
+    robot.add(body);
+
+    // Chest Ring & Glowing Core
+    const chestGeo = new THREE.TorusGeometry(0.14, 0.035, 16, 64);
+    const chestRing = new THREE.Mesh(chestGeo, greenTrim);
+    chestRing.position.set(0, -0.38, 0.5);
+    chestRing.rotation.x = 0.1;
+    robot.add(chestRing);
+
+    const coreGeo = new THREE.SphereGeometry(0.09, 16, 16);
+    const core = new THREE.Mesh(coreGeo, glowMaterial);
+    core.position.set(0, -0.38, 0.51);
+    robot.add(core);
+
+    // Head Group (for independent rotation)
+    const headGroup = new THREE.Group();
+    headGroup.position.y = 0.35;
+
+    // Head Mesh (stretched dome)
+    const headGeo = new THREE.SphereGeometry(0.72, 32, 32);
+    const head = new THREE.Mesh(headGeo, whitePlastic);
+    head.scale.set(1.15, 0.96, 1.0);
+    headGroup.add(head);
+
+    // Face Screen
+    const screenGeo = new THREE.SphereGeometry(0.66, 32, 32);
+    const screen = new THREE.Mesh(screenGeo, darkScreen);
+    screen.scale.set(1.04, 0.76, 0.72);
+    screen.position.set(0, -0.02, 0.16);
+    headGroup.add(screen);
+
+    // Eyes
+    const eyeGeo = new THREE.SphereGeometry(0.11, 32, 32);
+    
+    const eyeLeft = new THREE.Mesh(eyeGeo, eyeMaterial);
+    eyeLeft.position.set(-0.24, 0.02, 0.72);
+    headGroup.add(eyeLeft);
+
+    const eyeRight = new THREE.Mesh(eyeGeo, eyeMaterial);
+    eyeRight.position.set(0.24, 0.02, 0.72);
+    headGroup.add(eyeRight);
+
+    // Specular eye highlights
+    const specGeo = new THREE.SphereGeometry(0.035, 16, 16);
+    
+    const specLeft = new THREE.Mesh(specGeo, eyeHighlightMaterial);
+    specLeft.position.set(-0.21, 0.06, 0.81);
+    headGroup.add(specLeft);
+
+    const specRight = new THREE.Mesh(specGeo, eyeHighlightMaterial);
+    specRight.position.set(0.27, 0.06, 0.81);
+    headGroup.add(specRight);
+
+    // Ears / Headsets
+    const earGeo = new THREE.CylinderGeometry(0.14, 0.14, 0.12, 32);
+    
+    const earLeft = new THREE.Mesh(earGeo, greenTrim);
+    earLeft.rotation.z = Math.PI / 2;
+    earLeft.position.set(-0.84, 0, 0);
+    headGroup.add(earLeft);
+
+    const earRight = new THREE.Mesh(earGeo, greenTrim);
+    earRight.rotation.z = Math.PI / 2;
+    earRight.position.set(0.84, 0, 0);
+    headGroup.add(earRight);
+
+    robot.add(headGroup);
+
+    // Arms
+    const armGeo = new THREE.SphereGeometry(0.13, 16, 16);
+    
+    const armLeft = new THREE.Mesh(armGeo, whitePlastic);
+    armLeft.scale.set(1.0, 1.4, 1.0);
+    armLeft.position.set(-0.7, -0.4, 0.05);
+    robot.add(armLeft);
+
+    const armRight = new THREE.Mesh(armGeo, whitePlastic);
+    armRight.scale.set(1.0, 1.4, 1.0);
+    armRight.position.set(0.7, -0.4, 0.05);
+    robot.add(armRight);
+
+    // Legs / Feet
+    const legGeo = new THREE.CylinderGeometry(0.11, 0.13, 0.22, 16);
+    
+    const legLeft = new THREE.Mesh(legGeo, whitePlastic);
+    legLeft.position.set(-0.24, -1.05, 0.05);
+    robot.add(legLeft);
+
+    const legRight = new THREE.Mesh(legGeo, whitePlastic);
+    legRight.position.set(0.24, -1.05, 0.05);
+    robot.add(legRight);
+
+    const footGeo = new THREE.SphereGeometry(0.14, 16, 16);
+    
+    const footLeft = new THREE.Mesh(footGeo, greenTrim);
+    footLeft.scale.set(1, 0.6, 1.3);
+    footLeft.position.set(-0.24, -1.16, 0.1);
+    robot.add(footLeft);
+
+    const footRight = new THREE.Mesh(footGeo, greenTrim);
+    footRight.scale.set(1, 0.6, 1.3);
+    footRight.position.set(0.24, -1.16, 0.1);
+    robot.add(footRight);
+
+    robot.position.y = 0.15;
+    scene.add(robot);
+
+    // 6. Mouse Cursor Tracking Coordinates
+    let targetX = 0;
+    let targetY = 0;
+
+    const handleMouseMove = (e) => {
+      const x = (e.clientX / window.innerWidth) * 2 - 1;
+      const y = -(e.clientY / window.innerHeight) * 2 + 1;
+      // Limit range to prevent weird deformations
+      targetX = x * 0.35;
+      targetY = y * 0.25;
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+
+    // 7. Render Animation Loop
+    let clock = new THREE.Clock();
+    let animId = null;
+
+    const animate = () => {
+      const elapsedTime = clock.getElapsedTime();
+
+      // Bobbing floating motion
+      robot.position.y = 0.15 + Math.sin(elapsedTime * 2.2) * 0.07;
+      
+      // Interpolate head and body rotations to smoothly target cursor position
+      headGroup.rotation.y += (targetX - headGroup.rotation.y) * 0.1;
+      headGroup.rotation.x += (-targetY - headGroup.rotation.x) * 0.1;
+      robot.rotation.y += (targetX * 0.4 - robot.rotation.y) * 0.08;
+
+      // Animate core glow intensity over time
+      core.material.color.setHSL(0.25, 0.8, 0.5 + Math.sin(elapsedTime * 4) * 0.15);
+
+      renderer.render(scene, camera);
+      animId = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    // 8. Cleanup
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      cancelAnimationFrame(animId);
+      renderer.dispose();
+      scene.clear();
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (chatEndRef.current) {
@@ -39,8 +271,44 @@ export default function Chatbot({
   const generateResponse = (message) => {
     const msg = message.toLowerCase();
     
+    // 1. STRICT OFF-TOPIC KEYWORD CHECKS
+    const whitelist = [
+      "hi", "hello", "hey", "help", "who are you", "what are you", "sevasetu", "buddy",
+      "food", "eat", "meal", "surplus", "restaurant", "ahaar", "biryani", "waste", "package", "pick",
+      "clean", "drive", "swachh", "trash", "sanitation", "garbage", "rubbish",
+      "ngo", "task", "skills", "graphic", "design", "work", "sahaayak", "job",
+      "teach", "tutor", "education", "study", "math", "child", "shiksha", "learn",
+      "camp", "medical", "doctor", "health", "medicine", "pill", "swasthya", "clinic",
+      "clothes", "donation", "blanket", "toy", "book", "shirt", "pants", "vastra",
+      "elder", "senior", "groceries", "companionship", "visit", "punya", "grandparent",
+      "tree", "plant", "sapling", "canopy", "forest", "vriksha",
+      "animal", "dog", "cat", "rescue", "vet", "stray", "pashu", "pet", "adopt",
+      "fund", "money", "crowdfund", "campaign", "donate", "rs", "rupees", "contribute",
+      "sos", "emergency", "flood", "disaster", "danger", "urgent",
+      "reward", "point", "store", "voucher", "discount", "swiggy", "zepto", "ticket", "coupon",
+      "who am i", "my account", "role", "profile", "points", "dashboard"
+    ];
+
+    const hasMatch = whitelist.some(keyword => msg.includes(keyword));
+
+    if (!hasMatch) {
+      return "🤖 I am SevaBuddy, a dedicated chatbot helper for SevaSetu. I am programmed to only answer questions regarding the SevaSetu platform, its civic modules, and our live community database.\n\n" +
+        "Please ask a question related to SevaSetu (e.g. food listings, cleanup drives, tutoring slots, animal rescues, or emergency SOS alerts)!";
+    }
+
+    // 2. WHITELISTED GENERAL WELCOME/INTRO
+    if (msg.includes("hello") || msg.includes("hi") || msg.includes("hey") || msg.includes("who are you") || msg.includes("what are you") || msg.includes("help") || msg.includes("who is sevasetu") || msg.includes("what is sevasetu")) {
+      return "🤖 Hello! I am SevaBuddy, your interactive 3D chatbot helper. I can search live database entries (food packages, cleanup drives, active SOS coordinates, trees planted, stray animal rescues) and guide you on how to contribute to SevaSetu.\n\n" +
+        "Try asking me things like:\n" +
+        "👉 *Is there any surplus food?*\n" +
+        "👉 *Are there cleanup drives scheduled?*\n" +
+        "👉 *Are there any active SOS alerts?*\n" +
+        "👉 *How many trees did we plant?*\n" +
+        "👉 *How do I earn reward points?*";
+    }
+
     // Check SOS
-    if (msg.includes("sos") || msg.includes("emergency") || msg.includes("urgent") || msg.includes("flood")) {
+    if (msg.includes("sos") || msg.includes("emergency") || msg.includes("urgent") || msg.includes("flood") || msg.includes("disaster") || msg.includes("danger")) {
       const active = sosList.filter(s => s.status === "active");
       if (active.length > 0) {
         return `🚨 There are ${active.length} active emergency SOS alert(s):\n` + 
@@ -50,7 +318,7 @@ export default function Chatbot({
     }
     
     // Check Food/Ahaar
-    if (msg.includes("food") || msg.includes("eat") || msg.includes("meal") || msg.includes("surplus") || msg.includes("restaurant") || msg.includes("ahaar")) {
+    if (msg.includes("food") || msg.includes("eat") || msg.includes("meal") || msg.includes("surplus") || msg.includes("restaurant") || msg.includes("ahaar") || msg.includes("package") || msg.includes("pick")) {
       const pending = foods.filter(f => f.status === "pending");
       if (pending.length > 0) {
         return `🍲 We have ${pending.length} pending surplus food pickup(s):\n` +
@@ -61,7 +329,7 @@ export default function Chatbot({
     }
     
     // Check Cleanup Drives/Swachh
-    if (msg.includes("clean") || msg.includes("drive") || msg.includes("swachh") || msg.includes("trash") || msg.includes("sanitation") || msg.includes("garbage")) {
+    if (msg.includes("clean") || msg.includes("drive") || msg.includes("swachh") || msg.includes("trash") || msg.includes("sanitation") || msg.includes("garbage") || msg.includes("rubbish")) {
       const active = drives.filter(d => d.date >= new Date().toISOString().split("T")[0]);
       if (active.length > 0) {
         return `🧹 Active Swachh Bharat Drives:\n` +
@@ -72,7 +340,7 @@ export default function Chatbot({
     }
     
     // Check NGO tasks/Sahaayak
-    if (msg.includes("ngo") || msg.includes("task") || msg.includes("skills") || msg.includes("graphic") || msg.includes("design") || msg.includes("work") || msg.includes("sahaayak")) {
+    if (msg.includes("ngo") || msg.includes("task") || msg.includes("skills") || msg.includes("graphic") || msg.includes("design") || msg.includes("work") || msg.includes("sahaayak") || msg.includes("job")) {
       const openTasks = skills.filter(s => s.status === "open");
       if (openTasks.length > 0) {
         return `💼 Open Skill-based NGO micro-tasks:\n` +
@@ -83,7 +351,7 @@ export default function Chatbot({
     }
 
     // Check Tutor/Shiksha
-    if (msg.includes("teach") || msg.includes("tutor") || msg.includes("education") || msg.includes("study") || msg.includes("math") || msg.includes("child") || msg.includes("shiksha")) {
+    if (msg.includes("teach") || msg.includes("tutor") || msg.includes("education") || msg.includes("study") || msg.includes("math") || msg.includes("child") || msg.includes("shiksha") || msg.includes("learn")) {
       const activeReqs = tutorRequests.filter(r => r.status === "pending");
       if (activeReqs.length > 0) {
         return `📚 Active tutoring requests for children:\n` +
@@ -94,7 +362,7 @@ export default function Chatbot({
     }
 
     // Check Health/Swasthya/Meds
-    if (msg.includes("camp") || msg.includes("medical") || msg.includes("doctor") || msg.includes("health") || msg.includes("medicine") || msg.includes("pill") || msg.includes("swasthya")) {
+    if (msg.includes("camp") || msg.includes("medical") || msg.includes("doctor") || msg.includes("health") || msg.includes("medicine") || msg.includes("pill") || msg.includes("swasthya") || msg.includes("clinic")) {
       const activeCamps = camps.filter(c => c.status === "scheduled");
       const activeMeds = meds.filter(m => m.status === "available");
       let resp = "";
@@ -124,7 +392,7 @@ export default function Chatbot({
     }
 
     // Check Elderly/Punya
-    if (msg.includes("elder") || msg.includes("senior") || msg.includes("groceries") || msg.includes("companionship") || msg.includes("visit") || msg.includes("punya")) {
+    if (msg.includes("elder") || msg.includes("senior") || msg.includes("groceries") || msg.includes("companionship") || msg.includes("visit") || msg.includes("punya") || msg.includes("grandparent")) {
       const pending = elderly.filter(e => e.status === "pending");
       if (pending.length > 0) {
         return `❤️ Elderly support requests pending helper:\n` +
@@ -143,7 +411,7 @@ export default function Chatbot({
     }
 
     // Check Animal Rescue/Pashu
-    if (msg.includes("animal") || msg.includes("dog") || msg.includes("cat") || msg.includes("rescue") || msg.includes("vet") || msg.includes("stray") || msg.includes("pashu")) {
+    if (msg.includes("animal") || msg.includes("dog") || msg.includes("cat") || msg.includes("rescue") || msg.includes("vet") || msg.includes("stray") || msg.includes("pashu") || msg.includes("pet") || msg.includes("adopt")) {
       const reported = rescues.filter(r => r.status === "reported");
       if (reported.length > 0) {
         return `🐾 Injured stray animals reported (pending rescue):\n` +
@@ -154,7 +422,7 @@ export default function Chatbot({
     }
 
     // Check Crowdfund/Campaigns
-    if (msg.includes("fund") || msg.includes("money") || msg.includes("crowdfund") || msg.includes("campaign") || msg.includes("donate") || msg.includes("rs") || msg.includes("rupees")) {
+    if (msg.includes("fund") || msg.includes("money") || msg.includes("crowdfund") || msg.includes("campaign") || msg.includes("donate") || msg.includes("rs") || msg.includes("rupees") || msg.includes("contribute")) {
       if (crowd.length > 0) {
         return `🪙 Active Crowdfunding Campaigns (100% transparent):\n` +
           crowd.map(c => `- **${c.title}**: Raised ₹${c.currentAmount} of ₹${c.targetAmount} (${Math.round((c.currentAmount/c.targetAmount)*100)}%)`).join("\n") +
@@ -164,7 +432,7 @@ export default function Chatbot({
     }
 
     // Check Points & Rewards
-    if (msg.includes("reward") || msg.includes("point") || msg.includes("store") || msg.includes("voucher") || msg.includes("discount") || msg.includes("swiggy") || msg.includes("zepto")) {
+    if (msg.includes("reward") || msg.includes("point") || msg.includes("store") || msg.includes("voucher") || msg.includes("discount") || msg.includes("swiggy") || msg.includes("zepto") || msg.includes("ticket") || msg.includes("coupon")) {
       return "🎁 Earning & Redeeming Points on SevaSetu:\n" +
         "- **Earn Points**: By claiming food pickups (+30 Pts), participating in cleanup drives (+50 Pts), teaching (+40 Pts), assisting seniors (+50 Pts), rescuing animals (+40 Pts), or donating money (+10 Pts per ₹100).\n" +
         "- **Redeem Vouchers**: Visit the *Rewards* tab to redeem points for Zepto, Swiggy, or BookMyShow discounts!";
@@ -184,15 +452,8 @@ export default function Chatbot({
       return "👤 You are currently a Guest. Click the *Login* button in the top-right taskbar to sign in or register!";
     }
 
-    // General fallback
-    return "🤖 Hello! I am SevaBuddy, your cute 3D civic assistant. I search live database listings and website content to answer your questions.\n\n" +
-      "Try asking me things like:\n" +
-      "👉 *Is there any surplus food?*\n" +
-      "👉 *Are there cleanup drives scheduled?*\n" +
-      "👉 *Are there any active SOS alerts?*\n" +
-      "👉 *How many trees did we plant?*\n" +
-      "👉 *How do I earn reward points?*\n" +
-      "👉 *Show my profile*";
+    // Default fallback (should not trigger due to whitelists but keeping as safety)
+    return "🤖 Please ask a question related to SevaSetu civic modules or our community database!";
   };
 
   const handleSendMessage = (e) => {
@@ -208,7 +469,6 @@ export default function Chatbot({
     setMessages(prev => [...prev, userMsg]);
     setInputText("");
     setIsTyping(true);
-    setBotMood("thinking");
 
     setTimeout(() => {
       const responseText = generateResponse(userMsg.text);
@@ -219,30 +479,20 @@ export default function Chatbot({
       };
       setMessages(prev => [...prev, botMsg]);
       setIsTyping(false);
-      setBotMood("happy");
-      setTimeout(() => setBotMood("normal"), 2000);
     }, 1000);
   };
 
   return (
     <div id="sevasetu-chatbot">
-      {/* 3D Floating Avatar */}
+      {/* 3D Interactive WebGL Floating Avatar */}
       {!isOpen && (
         <button 
           className="chatbot-avatar-btn" 
           onClick={() => setIsOpen(true)}
           title="Chat with SevaBuddy"
         >
-          <div className="chatbot-avatar-3d">
-            {/* Specular Highlight Gloss Layer */}
-            <div className="specular-highlight"></div>
-            {/* Blinking eyes */}
-            <div className={`digital-eyes ${botMood}`}>
-              <div className="eye"></div>
-              <div className="eye"></div>
-            </div>
-            {/* Smile / Glow status */}
-            <div className={`digital-mouth ${botMood}`}></div>
+          <div className="chatbot-avatar-canvas-container">
+            <canvas ref={canvasRef} className="chatbot-avatar-canvas" />
           </div>
           <div className="chatbot-avatar-shadow"></div>
         </button>
@@ -302,13 +552,7 @@ export default function Chatbot({
               type="text" 
               placeholder="Ask about food, drives, SOS, points..." 
               value={inputText}
-              onChange={e => {
-                setInputText(e.target.value);
-                if (botMood === "normal") setBotMood("thinking");
-              }}
-              onBlur={() => {
-                if (botMood === "thinking") setBotMood("normal");
-              }}
+              onChange={e => setInputText(e.target.value)}
               className="chatbot-input"
             />
             <button type="submit" className="chatbot-send-btn">
