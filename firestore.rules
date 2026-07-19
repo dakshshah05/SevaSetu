@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // SevaSetu Security Rules for Testing and Development
+    // Allow read/write access to all collections for community testing.
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

@@ -92,7 +92,7 @@ export default function App() {
     setToasts(prev => [...prev, { id, message, isError }]);
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
-    }, 4500);
+    }, 7500);
   }, []);
 
   // --- SCROLL LISTENER FOR HEADER SCROLLED STATE ---
