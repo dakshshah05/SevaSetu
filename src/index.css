@@ -12,12 +12,12 @@
   --text-primary: #0D530E;
   --text-secondary: #306D29;
 
-  /* Card and layout system */
-  --radius-lg: 18px;
-  --radius-md: 10px;
-  --radius-sm: 6px;
-  --transition: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  --border-style: 1px solid rgba(48, 109, 41, 0.25);
+  /* Card and layout system (Claymorphism defaults) */
+  --radius-lg: 28px;
+  --radius-md: 20px;
+  --radius-sm: 14px;
+  --transition: 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --border-style: none; /* Soft clay highlights and shadows outline elements */
 }
 
 /* Global resets and structure */
@@ -74,23 +74,29 @@ h1, h2, h3, h4, h5, h6 {
   left: 0;
   right: 0;
   z-index: 100;
-  background: rgba(251, 245, 221, 0.95);
-  border-bottom: 1px solid var(--color-beige-dark);
-  padding: 10px 24px;
+  background: linear-gradient(180deg, #FBF5DD 0%, #f4edd0 100%);
+  border-bottom: none;
+  padding: 12px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   transition: var(--transition);
+  box-shadow: 
+    0 6px 20px rgba(180, 172, 130, 0.35),
+    inset 0 2px 4px #ffffff;
 }
 
 /* Taskbar Scrolled state with backdrop-blur */
 .top-taskbar.scrolled {
-  background: rgba(251, 245, 221, 0.85);
+  background: rgba(251, 245, 221, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 4px 20px rgba(13, 83, 14, 0.08);
-  padding: 6px 24px;
+  border-bottom: none;
+  box-shadow: 
+    0 8px 24px rgba(180, 172, 130, 0.45),
+    inset 0 2px 4px #ffffff;
+  padding: 8px 24px;
 }
 
 .logo-link {
@@ -105,13 +111,18 @@ h1, h2, h3, h4, h5, h6 {
 .logo-box {
   width: 36px;
   height: 36px;
-  background: var(--color-green-dark);
+  background: linear-gradient(135deg, #15803d 0%, var(--color-green-dark) 100%);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: opacity 0.2s ease;
   overflow: hidden;
+  box-shadow: 
+    3px 3px 8px rgba(13, 83, 14, 0.25), 
+    -3px -3px 8px rgba(255, 255, 255, 0.2), 
+    inset 2px 2px 4px rgba(255, 255, 255, 0.4), 
+    inset -2px -2px 4px rgba(0, 0, 0, 0.25);
 }
 
 .logo-img {
@@ -148,10 +159,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Sliding Nav Highlight Pill */
-.nav-highlight-pill {
+.sliding-highlight {
   position: absolute;
-  background: rgba(48, 109, 41, 0.08);
+  height: 36px;
+  background: var(--color-beige-light);
   border-radius: var(--radius-md);
+  box-shadow: 
+    inset 3px 3px 6px rgba(180, 172, 130, 0.35), 
+    inset -3px -3px 6px #ffffff;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   z-index: 0;
   pointer-events: none;
@@ -170,7 +185,7 @@ h1, h2, h3, h4, h5, h6 {
   cursor: pointer;
   transition: var(--transition);
   user-select: none;
-  border: 1px solid transparent;
+  border: none;
   position: relative;
   z-index: 1;
   flex-shrink: 0;
@@ -194,8 +209,11 @@ h1, h2, h3, h4, h5, h6 {
 
 .taskbar-item.active {
   color: var(--color-beige-light);
-  background: var(--color-green-medium);
-  border-color: var(--color-green-dark);
+  background: linear-gradient(135deg, #3bb632 0%, var(--color-green-medium) 100%);
+  border: none;
+  box-shadow: 
+    inset 2px 2px 4px rgba(255, 255, 255, 0.45), 
+    inset -2px -2px 4px rgba(0, 0, 0, 0.25);
 }
 
 .taskbar-item.active svg {
@@ -207,10 +225,13 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(231, 225, 177, 0.4);
+  background: var(--color-beige-light);
   padding: 6px 14px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-beige-dark);
+  border: none;
+  box-shadow: 
+    inset 3px 3px 6px rgba(180, 172, 130, 0.35), 
+    inset -3px -3px 6px #ffffff;
   transition: opacity 0.2s ease;
   flex-shrink: 0;
 }
@@ -323,11 +344,11 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 12px 24px; /* Puffy padding */
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   border-radius: var(--radius-md);
-  border: 1px solid transparent;
+  border: none;
   cursor: pointer;
   transition: var(--transition);
   text-decoration: none;
@@ -335,66 +356,120 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn:active {
-  transform: scale(0.96);
+  transform: scale(0.95);
 }
 
 .btn-primary {
-  background-color: var(--color-green-medium);
+  background: linear-gradient(135deg, #3bb632 0%, var(--color-green-medium) 100%);
   color: var(--color-beige-light);
+  box-shadow: 
+    6px 6px 12px rgba(13, 83, 14, 0.25), 
+    -6px -6px 12px rgba(255, 255, 255, 0.25), 
+    inset 3px 3px 6px rgba(255, 255, 255, 0.45), 
+    inset -3px -3px 6px rgba(0, 0, 0, 0.25);
 }
 
 .btn-primary:hover {
-  background-color: var(--color-green-dark);
+  background: linear-gradient(135deg, #329e2a 0%, var(--color-green-dark) 100%);
+  box-shadow: 
+    4px 4px 8px rgba(13, 83, 14, 0.3), 
+    -4px -4px 8px rgba(255, 255, 255, 0.3), 
+    inset 3px 3px 6px rgba(255, 255, 255, 0.55), 
+    inset -3px -3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.btn-primary:active {
+  box-shadow: 
+    inset 4px 4px 8px rgba(0, 0, 0, 0.35), 
+    inset -4px -4px 8px rgba(255, 255, 255, 0.2);
 }
 
 .btn-secondary {
-  background-color: var(--color-beige-dark);
+  background: linear-gradient(135deg, #f4edd2 0%, var(--color-beige-dark) 100%);
   color: var(--color-green-dark);
+  box-shadow: 
+    6px 6px 12px rgba(180, 172, 130, 0.4), 
+    -6px -6px 12px #ffffff, 
+    inset 3px 3px 6px #ffffff, 
+    inset -3px -3px 6px rgba(180, 172, 130, 0.25);
 }
 
 .btn-secondary:hover {
-  background-color: rgba(231, 225, 177, 0.7);
+  background: linear-gradient(135deg, #eee6c8 0%, #ded79d 100%);
+  box-shadow: 
+    4px 4px 8px rgba(180, 172, 130, 0.45), 
+    -4px -4px 8px #ffffff, 
+    inset 3px 3px 6px #ffffff, 
+    inset -3px -3px 6px rgba(180, 172, 130, 0.3);
+}
+
+.btn-secondary:active {
+  box-shadow: 
+    inset 4px 4px 8px rgba(180, 172, 130, 0.5), 
+    inset -4px -4px 8px #ffffff;
 }
 
 .btn-outline {
-  background-color: transparent;
+  background: var(--color-beige-light);
   color: var(--color-green-medium);
-  border: 1px solid var(--color-green-medium);
+  border: none;
+  box-shadow: 
+    inset 3px 3px 6px rgba(180, 172, 130, 0.35), 
+    inset -3px -3px 6px #ffffff;
 }
 
 .btn-outline:hover {
-  background-color: rgba(48, 109, 41, 0.1);
+  color: var(--color-green-dark);
+  box-shadow: 
+    inset 4px 4px 8px rgba(180, 172, 130, 0.45), 
+    inset -4px -4px 8px #ffffff;
 }
 
 .btn-orange {
-  background-color: var(--color-green-dark);
+  background: linear-gradient(135deg, #15803d 0%, var(--color-green-dark) 100%);
   color: var(--color-beige-light);
-  border: 1px solid var(--color-green-medium);
+  border: none;
+  box-shadow: 
+    6px 6px 12px rgba(13, 83, 14, 0.3), 
+    -6px -6px 12px rgba(255, 255, 255, 0.2), 
+    inset 3px 3px 6px rgba(255, 255, 255, 0.4), 
+    inset -3px -3px 6px rgba(0, 0, 0, 0.3);
 }
 
 .btn-orange:hover {
-  background-color: var(--color-green-medium);
+  background: linear-gradient(135deg, #16a34a 0%, var(--color-green-medium) 100%);
+  box-shadow: 
+    4px 4px 8px rgba(13, 83, 14, 0.35), 
+    -4px -4px 8px rgba(255, 255, 255, 0.25), 
+    inset 3px 3px 6px rgba(255, 255, 255, 0.45), 
+    inset -3px -3px 6px rgba(0, 0, 0, 0.25);
 }
 
-/* Glassmorphic/sage Cards */
+/* Claymorphism Cards */
 .card {
-  background-color: var(--color-beige-dark);
-  border: 1px solid rgba(48, 109, 41, 0.2);
+  background: linear-gradient(135deg, var(--color-beige-light) 0%, #f4edd0 100%);
+  border: none;
   border-radius: var(--radius-lg);
-  padding: 24px;
-  box-shadow: 0 4px 15px rgba(13, 83, 14, 0.04);
-  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
-              border-color 0.4s ease, 
+  padding: 28px; /* Puffy padding */
+  box-shadow: 
+    8px 8px 20px rgba(180, 172, 130, 0.4), 
+    -8px -8px 20px #ffffff, 
+    inset 4px 4px 8px #ffffff, 
+    inset -4px -4px 8px rgba(180, 172, 130, 0.25);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
               box-shadow 0.4s ease;
   position: relative;
-  overflow: hidden;
+  overflow: visible; /* Prevent clipping of puffy elements */
   color: var(--color-green-dark);
 }
 
 .card:hover {
-  transform: translateY(-6px) scale(1.01);
-  border-color: var(--color-green-medium);
-  box-shadow: 0 16px 36px rgba(13, 83, 14, 0.08);
+  transform: translateY(-8px) scale(1.015);
+  box-shadow: 
+    12px 12px 28px rgba(180, 172, 130, 0.5), 
+    -12px -12px 28px #ffffff, 
+    inset 5px 5px 10px #ffffff, 
+    inset -5px -5px 10px rgba(180, 172, 130, 0.35);
 }
 
 /* Subtle gradient glow inside card backgrounds */
@@ -405,7 +480,7 @@ h1, h2, h3, h4, h5, h6 {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, rgba(251, 245, 221, 0.1), rgba(48, 109, 41, 0.05));
+  background: linear-gradient(135deg, rgba(251, 245, 221, 0.05), rgba(48, 109, 41, 0.02));
   opacity: 0;
   transition: opacity 0.4s ease;
   pointer-events: none;
@@ -415,10 +490,22 @@ h1, h2, h3, h4, h5, h6 {
   opacity: 1;
 }
 
-/* Card highlight variants using low-opacity borders */
-.card-teal { border-left: 4px solid var(--color-green-medium); }
-.card-violet { border-left: 4px solid var(--color-green-dark); }
-.card-orange { border-left: 4px solid var(--color-green-medium); }
+/* Card highlight variants using thick rounded trims */
+.card-teal { 
+  border-left: 6px solid var(--color-green-medium); 
+  border-top-left-radius: 8px; 
+  border-bottom-left-radius: 8px; 
+}
+.card-violet { 
+  border-left: 6px solid var(--color-green-dark); 
+  border-top-left-radius: 8px; 
+  border-bottom-left-radius: 8px; 
+}
+.card-orange { 
+  border-left: 6px solid var(--color-green-medium); 
+  border-top-left-radius: 8px; 
+  border-bottom-left-radius: 8px; 
+}
 
 /* Dashboard Layout components */
 .stats-grid {
@@ -443,9 +530,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .stat-icon.teal, .stat-icon.violet, .stat-icon.orange {
-  background: rgba(48, 109, 41, 0.15);
+  background: var(--color-beige-light);
   color: var(--color-green-dark);
-  border: 1px solid rgba(48, 109, 41, 0.3);
+  border: none;
+  box-shadow: 
+    inset 2px 2px 4px rgba(180, 172, 130, 0.35), 
+    inset -2px -2px 4px #ffffff;
 }
 
 .stat-info {
@@ -499,20 +589,25 @@ h1, h2, h3, h4, h5, h6 {
 
 .form-control {
   background-color: var(--color-beige-light);
-  border: 1px solid var(--color-beige-dark);
-  padding: 10px 14px;
-  border-radius: var(--radius-md);
+  border: none;
+  padding: 12px 18px; /* Puffy padding */
+  border-radius: var(--radius-sm);
   color: var(--color-green-dark);
   font-family: 'Inter', sans-serif;
   font-size: 13px;
+  font-weight: 500;
+  box-shadow: 
+    inset 4px 4px 8px rgba(180, 172, 130, 0.45), 
+    inset -4px -4px 8px #ffffff;
   transition: var(--transition);
   width: 100%;
 }
 
 .form-control:focus {
   outline: none;
-  border-color: var(--color-green-dark);
-  box-shadow: 0 0 10px rgba(13, 83, 14, 0.15);
+  box-shadow: 
+    inset 5px 5px 10px rgba(48, 109, 41, 0.3), 
+    inset -5px -5px 10px #ffffff;
 }
 
 textarea.form-control {
@@ -529,28 +624,39 @@ select.form-control option {
 .tab-group {
   display: flex;
   gap: 6px;
+  background: var(--color-beige-light);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  box-shadow: 
+    inset 3px 3px 6px rgba(180, 172, 130, 0.35), 
+    inset -3px -3px 6px #ffffff;
+  width: max-content;
 }
 
 .tab-btn {
   background: transparent;
   color: var(--text-secondary);
-  border: 1px solid transparent;
-  padding: 6px 14px;
-  border-radius: 16px;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 14px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 12px;
   transition: var(--transition);
 }
 
 .tab-btn:hover {
   color: var(--color-green-dark);
-  background: rgba(231, 225, 177, 0.4);
 }
 
 .tab-btn.active {
-  background: var(--color-green-medium);
+  background: linear-gradient(135deg, #3bb632 0%, var(--color-green-medium) 100%);
   color: var(--color-beige-light);
+  box-shadow: 
+    3px 3px 8px rgba(13, 83, 14, 0.2), 
+    -3px -3px 8px rgba(255, 255, 255, 0.2), 
+    inset 2px 2px 4px rgba(255, 255, 255, 0.4), 
+    inset -2px -2px 4px rgba(0, 0, 0, 0.25);
 }
 
 /* Card Decks */
@@ -569,18 +675,39 @@ select.form-control option {
 
 .badge {
   display: inline-flex;
-  padding: 3px 10px;
-  border-radius: 10px;
+  padding: 4px 12px;
+  border-radius: 12px;
   font-size: 9px;
   font-weight: 800;
   width: max-content;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  border: none;
 }
 
-.badge-pending { border: 1px solid var(--color-green-medium); color: var(--color-green-medium); }
-.badge-claimed { background: var(--color-green-medium); color: var(--color-beige-light); }
-.badge-completed { background: var(--color-green-dark); color: var(--color-beige-light); }
+.badge-pending { 
+  background: var(--color-beige-light); 
+  color: var(--color-green-medium);
+  box-shadow: 
+    inset 2px 2px 4px rgba(180, 172, 130, 0.35), 
+    inset -2px -2px 4px #ffffff;
+}
+
+.badge-claimed { 
+  background: linear-gradient(135deg, #3bb632 0%, var(--color-green-medium) 100%);
+  color: var(--color-beige-light);
+  box-shadow: 
+    inset 2px 2px 4px rgba(255, 255, 255, 0.4), 
+    inset -2px -2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.badge-completed { 
+  background: linear-gradient(135deg, #15803d 0%, var(--color-green-dark) 100%);
+  color: var(--color-beige-light);
+  box-shadow: 
+    inset 2px 2px 4px rgba(255, 255, 255, 0.4), 
+    inset -2px -2px 4px rgba(0, 0, 0, 0.2);
+}
 
 .pickup-details {
   display: flex;
@@ -621,17 +748,21 @@ select.form-control option {
 }
 
 .modal-content {
-  background: var(--color-beige-light);
-  border: 2px solid var(--color-green-medium);
-  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--color-beige-light) 0%, #f4edd0 100%);
+  border: none;
+  border-radius: 32px;
   max-width: 500px;
   width: 100%;
   max-height: 90vh;
-  box-shadow: 0 24px 50px rgba(13, 83, 14, 0.2);
+  box-shadow: 
+    16px 16px 40px rgba(180, 172, 130, 0.5), 
+    -16px -16px 40px #ffffff, 
+    inset 6px 6px 12px #ffffff, 
+    inset -6px -6px 12px rgba(180, 172, 130, 0.3);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  animation: modalEntrance 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+  overflow: visible; /* Let overlapping elements float */
+  animation: modalEntrance 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 @keyframes modalEntrance {
@@ -1035,12 +1166,16 @@ select.form-control option {
 .chatbot-window {
   width: 340px;
   height: 480px;
-  border-radius: 20px;
-  background: rgba(251, 245, 221, 0.95); /* beige background */
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--color-beige-light) 0%, #f4edd0 100%);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(48, 109, 41, 0.25);
-  box-shadow: var(--shadow-lg);
+  border: none;
+  box-shadow: 
+    12px 12px 30px rgba(180, 172, 130, 0.5), 
+    -12px -12px 30px #ffffff, 
+    inset 5px 5px 10px #ffffff, 
+    inset -5px -5px 10px rgba(180, 172, 130, 0.3);
   display: flex;
   flex-direction: column;
   overflow: visible; /* Allow robot to overflow top border */
@@ -1143,25 +1278,31 @@ select.form-control option {
 }
 
 .chat-bubble {
-  padding: 10px 14px;
-  border-radius: 16px;
+  padding: 12px 16px;
+  border-radius: 20px;
   font-size: 12.5px;
   line-height: 1.45;
 }
 
 .chat-bubble.user {
-  background: var(--color-green-medium);
+  background: linear-gradient(135deg, #3bb632 0%, var(--color-green-medium) 100%);
   color: var(--color-beige-light);
   border-bottom-right-radius: 4px;
-  box-shadow: 0 2px 6px rgba(48, 109, 41, 0.15);
+  box-shadow: 
+    3px 3px 8px rgba(13, 83, 14, 0.15), 
+    inset 2px 2px 4px rgba(255, 255, 255, 0.35), 
+    inset -2px -2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .chat-bubble.bot {
-  background: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #f7f4e9 100%);
   color: var(--color-green-dark);
   border-bottom-left-radius: 4px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(48, 109, 41, 0.1);
+  border: none;
+  box-shadow: 
+    3px 3px 8px rgba(180, 172, 130, 0.25), 
+    inset 2px 2px 4px #ffffff, 
+    inset -2px -2px 4px rgba(180, 172, 130, 0.15);
 }
 
 /* Typing Indicator Animation */
@@ -1190,24 +1331,30 @@ select.form-control option {
 
 /* Input Area Form */
 .chatbot-input-area {
-  padding: 12px 16px;
-  background: #ffffff;
-  border-top: 1px solid rgba(48, 109, 41, 0.15);
+  padding: 14px 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7f4e9 100%);
+  border-top: none;
   display: flex;
   gap: 8px;
   align-items: center;
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
+  box-shadow: inset 0 2px 4px rgba(180, 172, 130, 0.15);
 }
 
 .chatbot-input {
   flex: 1;
-  border: 1px solid var(--color-beige-dark);
+  border: none;
   background: var(--color-beige-light);
   border-radius: 20px;
-  padding: 8px 16px;
+  padding: 10px 18px;
   font-size: 12px;
   color: var(--color-green-dark);
   outline: none;
-  transition: border-color 0.2s;
+  box-shadow: 
+    inset 3px 3px 6px rgba(180, 172, 130, 0.4), 
+    inset -3px -3px 6px #ffffff;
+  transition: var(--transition);
 }
 
 .chatbot-input:focus {
@@ -1215,7 +1362,7 @@ select.form-control option {
 }
 
 .chatbot-send-btn {
-  background: var(--color-green-medium);
+  background: linear-gradient(135deg, #3bb632 0%, var(--color-green-medium) 100%);
   border: none;
   color: var(--color-beige-light);
   border-radius: 50%;
@@ -1225,14 +1372,22 @@ select.form-control option {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
+  box-shadow: 
+    3px 3px 8px rgba(13, 83, 14, 0.2), 
+    -3px -3px 8px rgba(255, 255, 255, 0.2), 
+    inset 2px 2px 4px rgba(255, 255, 255, 0.45), 
+    inset -2px -2px 4px rgba(0, 0, 0, 0.25);
+  transition: var(--transition);
 }
 
 .chatbot-send-btn:hover {
-  background: var(--color-green-dark);
+  background: linear-gradient(135deg, #329e2a 0%, var(--color-green-dark) 100%);
   transform: scale(1.05);
 }
 
 .chatbot-send-btn:active {
   transform: scale(0.95);
+  box-shadow: 
+    inset 2px 2px 4px rgba(0, 0, 0, 0.35), 
+    inset -2px -2px 4px rgba(255, 255, 255, 0.2);
 }
