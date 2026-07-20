@@ -40,11 +40,19 @@ import Crowdfund from "./components/Crowdfund";
 import SOS from "./components/SOS";
 import RewardsStore from "./components/RewardsStore";
 import Chatbot from "./components/Chatbot";
+import LandingPage from "./components/LandingPage";
 
 export default function App() {
   // --- STATE SYSTEM ---
   const [activeView, setActiveView] = useState("dashboard");
   const [user, setUser] = useState(null);
+  const [showLanding, setShowLanding] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      setShowLanding(false);
+    }
+  }, [user]);
   
   // Real-Time Sync Lists
   const [foods, setFoods] = useState([]);
@@ -284,6 +292,7 @@ export default function App() {
     await DB.logout();
     triggerToast("Logged out successfully.");
     setActiveView("dashboard");
+    setShowLanding(true);
   };
 
   const handleUpgradeToVolunteer = () => {
@@ -296,10 +305,25 @@ export default function App() {
 
   return (
     <div className="app-container">
-      
-      {/* --- STICKY TOP TASKBAR NAVIGATION --- */}
-      <header className={`top-taskbar ${scrolled ? "scrolled" : ""}`}>
-        <div className="logo-link" onClick={() => setActiveView("dashboard")}>
+      {showLanding && !user ? (
+        <LandingPage 
+          onEnterApp={() => setShowLanding(false)} 
+          onOpenAuth={(tab) => {
+            setAuthTab(tab);
+            setAuthModal(true);
+          }}
+        />
+      ) : (
+        <>
+          {/* --- STICKY TOP TASKBAR NAVIGATION --- */}
+          <header className={`top-taskbar ${scrolled ? "scrolled" : ""}`}>
+        <div className="logo-link" onClick={() => {
+          if (!user) {
+            setShowLanding(true);
+          } else {
+            setActiveView("dashboard");
+          }
+        }}>
           <div className="logo-box">
             <img src={logoPng} alt="SevaSetu Logo" className="logo-img" />
           </div>
@@ -852,6 +876,8 @@ export default function App() {
         rescues={animalRescues}
         user={user}
       />
+        </>
+      )}
 
       {/* --- TOAST ALERTS OVERLAY --- */}
       <div className="toast-container">
