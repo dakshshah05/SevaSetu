@@ -321,7 +321,7 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                     Restaurants broadcast excess food alerts, volunteers lock transit routes, and shelter feedings 
                     are verified in real-time.
                   </p>
-                  <button className="btn-card-action" onClick={onEnterApp}>Launch Ahaar Setu</button>
+                  <button className="btn-card-action hover-active" onClick={() => onEnterApp("food-waste")}>Launch Ahaar Setu</button>
                 </div>
               </div>
 
@@ -338,7 +338,7 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                     Organizes local community cleanup drives. Volunteers enlist for sanitation events, upload before-and-after 
                     photographic proof, and earn validated Seva points upon NGO approval.
                   </p>
-                  <button className="btn-card-action" onClick={onEnterApp}>Launch Swachh Setu</button>
+                  <button className="btn-card-action hover-active" onClick={() => onEnterApp("cleanup-drives")}>Launch Swachh Setu</button>
                 </div>
               </div>
 
@@ -355,7 +355,7 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                     Empowers verified NGOs to recruit volunteers, roster skilled talent (design, logistics, legal), 
                     and publish micro-tasks to streamline grassroots operations.
                   </p>
-                  <button className="btn-card-action" onClick={onEnterApp}>Launch Sahaayak Setu</button>
+                  <button className="btn-card-action hover-active" onClick={() => onEnterApp("ngo-admin")}>Launch Sahaayak Setu</button>
                 </div>
               </div>
 
@@ -372,7 +372,7 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                     Matches volunteer tutors with underprivileged children who lack academic support. 
                     Tutors submit subjects and locations, parents request sessions, and direct 1-on-1 learning is scheduled.
                   </p>
-                  <button className="btn-card-action" onClick={onEnterApp}>Launch Shiksha Setu</button>
+                  <button className="btn-card-action hover-active" onClick={() => onEnterApp("shiksha")}>Launch Shiksha Setu</button>
                 </div>
               </div>
 
@@ -389,7 +389,7 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                     Coordinates free health screening camps with volunteer doctors, generates digital patient tokens, 
                     and facilitates surplus unexpired medicine donations to needy clinics.
                   </p>
-                  <button className="btn-card-action" onClick={onEnterApp}>Launch Swasthya Setu</button>
+                  <button className="btn-card-action hover-active" onClick={() => onEnterApp("swasthya")}>Launch Swasthya Setu</button>
                 </div>
               </div>
 
@@ -406,7 +406,7 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                     Facilitates neighborhood donation drives for gently-used clothing, winter blankets, and children's books, 
                     enabling volunteer pickup and shelter distribution.
                   </p>
-                  <button className="btn-card-action" onClick={onEnterApp}>Launch Vastra Setu</button>
+                  <button className="btn-card-action hover-active" onClick={() => onEnterApp("vastra")}>Launch Vastra Setu</button>
                 </div>
               </div>
 
@@ -423,7 +423,7 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                     Pairs volunteer companions with local senior citizens needing grocery pickup assistance, home check-ins, 
                     or friendly conversations.
                   </p>
-                  <button className="btn-card-action" onClick={onEnterApp}>Launch Punya Setu</button>
+                  <button className="btn-card-action hover-active" onClick={() => onEnterApp("punya")}>Launch Punya Setu</button>
                 </div>
               </div>
 
@@ -440,7 +440,7 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                     Organizes urban tree planting drives where citizens plant virtual name-labeled trees, log physical 
                     sapling growth checks, and earn points as trees mature.
                   </p>
-                  <button className="btn-card-action" onClick={onEnterApp}>Launch Vriksha Setu</button>
+                  <button className="btn-card-action hover-active" onClick={() => onEnterApp("vriksha")}>Launch Vriksha Setu</button>
                 </div>
               </div>
 
@@ -457,7 +457,7 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                     Allows citizens to report injured stray animals with location photos, dispatches nearby rescuers, 
                     provides a vet clinic directory, and lists pets for adoption.
                   </p>
-                  <button className="btn-card-action" onClick={onEnterApp}>Launch Pashu Setu</button>
+                  <button className="btn-card-action hover-active" onClick={() => onEnterApp("pashu")}>Launch Pashu Setu</button>
                 </div>
               </div>
 
@@ -474,7 +474,7 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                     Enables verified NGOs to create emergency funding campaigns. Donors track exact fund allocations 
                     and receive photographic receipt proof for total transparency.
                   </p>
-                  <button className="btn-card-action" onClick={onEnterApp}>Launch Crowdfund</button>
+                  <button className="btn-card-action hover-active" onClick={() => onEnterApp("crowd")}>Launch Crowdfund</button>
                 </div>
               </div>
 
@@ -491,7 +491,7 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                     Instant geo-targeted SOS alert system for disaster relief, blood shortage emergencies, or rapid volunteer 
                     mobilization in crisis zones.
                   </p>
-                  <button className="btn-card-action" onClick={onEnterApp}>Launch Emergency SOS</button>
+                  <button className="btn-card-action hover-active" onClick={() => onEnterApp("sos")}>Launch Emergency SOS</button>
                 </div>
               </div>
 
@@ -508,7 +508,7 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                     The gamified heart of SevaSetu. Convert points earned from civic work into exclusive discount promo codes 
                     sponsored by partner restaurants and corporate sponsors.
                   </p>
-                  <button className="btn-card-action" onClick={onEnterApp}>Launch Rewards Store</button>
+                  <button className="btn-card-action hover-active" onClick={() => onEnterApp("rewards-store")}>Launch Rewards Store</button>
                 </div>
               </div>
 
@@ -530,7 +530,7 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
               <div className="dome-gallery">
                 
                 {/* Item 1: Food */}
-                <div className="dome-item item-curved-1">
+                <div className="dome-item item-curved-1 hover-active" onClick={() => onEnterApp("food-waste")}>
                   <img src="/gallery_food.png" alt="Ahaar Setu Feedings" />
                   <div className="dome-info">
                     <span className="gallery-tag">Ahaar Setu</span>
@@ -540,7 +540,7 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                 </div>
 
                 {/* Item 2: Cleanup */}
-                <div className="dome-item item-curved-2">
+                <div className="dome-item item-curved-2 hover-active" onClick={() => onEnterApp("cleanup-drives")}>
                   <img src="/gallery_cleanup.png" alt="Swachh Bharat Cleanups" />
                   <div className="dome-info">
                     <span className="gallery-tag">Swachh Setu</span>
@@ -550,7 +550,7 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                 </div>
 
                 {/* Item 3: Education */}
-                <div className="dome-item item-curved-3">
+                <div className="dome-item item-curved-3 hover-active" onClick={() => onEnterApp("shiksha")}>
                   <img src="/gallery_education.png" alt="Shiksha Setu Mentorship" />
                   <div className="dome-info">
                     <span className="gallery-tag">Shiksha Setu</span>
@@ -560,7 +560,7 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                 </div>
 
                 {/* Item 4: Medical */}
-                <div className="dome-item item-curved-4">
+                <div className="dome-item item-curved-4 hover-active" onClick={() => onEnterApp("swasthya")}>
                   <img src="/gallery_medical.png" alt="Medical Checkup Camp" />
                   <div className="dome-info">
                     <span className="gallery-tag">Swasthya Setu</span>
@@ -570,7 +570,7 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                 </div>
 
                 {/* Item 5: Tree Plantation */}
-                <div className="dome-item item-curved-5">
+                <div className="dome-item item-curved-5 hover-active" onClick={() => onEnterApp("vriksha")}>
                   <img src="/gallery_vriksha.png" alt="Tree Plantation Drive" />
                   <div className="dome-info">
                     <span className="gallery-tag">Vriksha Setu</span>
@@ -580,7 +580,7 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                 </div>
 
                 {/* Item 6: Animal Rescue */}
-                <div className="dome-item item-curved-6">
+                <div className="dome-item item-curved-6 hover-active" onClick={() => onEnterApp("pashu")}>
                   <img src="/gallery_pashu.png" alt="Animal Rescue" />
                   <div className="dome-info">
                     <span className="gallery-tag">Pashu Setu</span>
@@ -590,7 +590,7 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                 </div>
 
                 {/* Item 7: Rewards */}
-                <div className="dome-item item-curved-7">
+                <div className="dome-item item-curved-7 hover-active" onClick={() => onEnterApp("rewards-store")}>
                   <img src="/gallery_rewards.png" alt="Volunteer Rewards" />
                   <div className="dome-info">
                     <span className="gallery-tag">Rewards Store</span>

@@ -307,7 +307,12 @@ export default function App() {
     <div className="app-container">
       {showLanding && !user ? (
         <LandingPage 
-          onEnterApp={() => setShowLanding(false)} 
+          onEnterApp={(targetView) => {
+            if (targetView && typeof targetView === "string") {
+              setActiveView(targetView);
+            }
+            setShowLanding(false);
+          }} 
           onOpenAuth={(tab) => {
             setAuthTab(tab);
             setAuthModal(true);
