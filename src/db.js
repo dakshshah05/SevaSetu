@@ -316,6 +316,12 @@ const MOCK_MEDS = [
   { id: "med_1", medicineName: "Vitamin C Supplements 500mg", quantity: "10 boxes of 100 tablets", expiryDate: "2027-08-15", location: "Koramangala Pharmacy Hub", donorName: "Green Garden Cafe", status: "available", claimedBy: null }
 ];
 
+const MOCK_REVIEWS = [
+  { id: "rev_1", userName: "Golden Spoon Restaurant", rating: 5, category: "Ahaar Setu", text: "SevaSetu has made it so easy for our restaurant to donate leftover meals. We feel great knowing it goes to shelters instead of landfills!", date: new Date().toISOString() },
+  { id: "rev_2", userName: "Aarav Mehta", rating: 5, category: "Swachh Setu", text: "Organizing and participating in sanitation campaigns with Swachh Setu has brought our community together. Puffy graphics, points, and real impact!", date: new Date().toISOString() },
+  { id: "rev_3", userName: "Priya Sharma", rating: 5, category: "Shiksha Setu", text: "Tutoring kids in the evening through Shiksha Setu is the highlight of my week. A must-join platform!", date: new Date().toISOString() }
+];
+
 // Local state initialization for Mock Fallback
 const initializeLocalStorage = () => {
   if (!localStorage.getItem("sevasetu_users")) {
@@ -339,6 +345,7 @@ const initializeLocalStorage = () => {
     localStorage.setItem("sevasetu_elderly_visits", JSON.stringify(MOCK_ELDERLY_VISITS));
     localStorage.setItem("sevasetu_trees", JSON.stringify(MOCK_TREES));
     localStorage.setItem("sevasetu_animal_rescues", JSON.stringify(MOCK_ANIMAL_RESCUES));
+    localStorage.setItem("sevasetu_reviews", JSON.stringify(MOCK_REVIEWS));
   }
 };
 initializeLocalStorage();
@@ -362,7 +369,8 @@ const localSubscriptions = {
   elderly: [],
   elderly_visits: [],
   trees: [],
-  animal_rescues: []
+  animal_rescues: [],
+  reviews: []
 };
 
 const notifySubscribers = (key, data) => {
@@ -1662,6 +1670,24 @@ export const DB = {
         this.triggerProfileSync(users[idx]);
         notifySubscribers("users", users);
       }
+    }
+  },
+
+  async submitReview(userName, rating, category, text) {
+    const payload = {
+      userName,
+      rating: parseInt(rating),
+      category,
+      text,
+      date: new Date().toISOString()
+    };
+    if (isConfigValid) {
+      await fbAddDoc(collection(db, "reviews"), payload);
+    } else {
+      const list = JSON.parse(localStorage.getItem("sevasetu_reviews") || "[]");
+      list.push({ id: Date.now().toString(), ...payload });
+      localStorage.setItem("sevasetu_reviews", JSON.stringify(list));
+      notifySubscribers("reviews", list);
     }
   }
 }

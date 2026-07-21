@@ -18,7 +18,10 @@ import {
   LogOut, 
   UserPlus, 
   LogIn, 
-  Activity 
+  Activity,
+  MessageSquare,
+  BarChart3,
+  HelpCircle
 } from "lucide-react";
 import { DB } from "./db";
 import { isConfigValid } from "./firebase";
@@ -41,6 +44,9 @@ import SOS from "./components/SOS";
 import RewardsStore from "./components/RewardsStore";
 import Chatbot from "./components/Chatbot";
 import LandingPage from "./components/LandingPage";
+import Reviews from "./components/Reviews";
+import Reports from "./components/Reports";
+import HelpCenter from "./components/HelpCenter";
 
 export default function App() {
   // --- STATE SYSTEM ---
@@ -487,6 +493,39 @@ export default function App() {
             <Gift />
             <span>Rewards</span>
           </div>
+
+          <div 
+            ref={el => navItemsRef.current[13] = el}
+            className={`taskbar-item ${activeView === "reviews" ? "active" : ""}`} 
+            onClick={() => setActiveView("reviews")} 
+            onMouseEnter={() => setHoveredIndex(13)}
+            role="button"
+          >
+            <MessageSquare />
+            <span>Reviews</span>
+          </div>
+
+          <div 
+            ref={el => navItemsRef.current[14] = el}
+            className={`taskbar-item ${activeView === "reports" ? "active" : ""}`} 
+            onClick={() => setActiveView("reports")} 
+            onMouseEnter={() => setHoveredIndex(14)}
+            role="button"
+          >
+            <BarChart3 />
+            <span>Reports</span>
+          </div>
+
+          <div 
+            ref={el => navItemsRef.current[15] = el}
+            className={`taskbar-item ${activeView === "help" ? "active" : ""}`} 
+            onClick={() => setActiveView("help")} 
+            onMouseEnter={() => setHoveredIndex(15)}
+            role="button"
+          >
+            <HelpCircle />
+            <span>Help Center</span>
+          </div>
         </nav>
 
         {user ? (
@@ -537,6 +576,9 @@ export default function App() {
               {activeView === "crowd" && "Punya Setu - NGO Crowdfunding"}
               {activeView === "sos" && "Emergency SOS relief"}
               {activeView === "rewards-store" && "Voucher Store Marketplace"}
+              {activeView === "reviews" && "Community Reviews"}
+              {activeView === "reports" && "Impact & Savings Reports"}
+              {activeView === "help" && "Help Center & FAQs"}
             </h1>
             <p style={{ marginTop: "4px" }}>
               {activeView === "dashboard" && "Overview of community impact, leaderboards, and collaborative modules."}
@@ -552,6 +594,9 @@ export default function App() {
               {activeView === "crowd" && "Fund verified campaigns and track spending allocations with 100% transparency."}
               {activeView === "sos" && "Real-time emergency relief coordinates and volunteer broadcasts."}
               {activeView === "rewards-store" && "Exchange points earned from civic work for partner discount codes."}
+              {activeView === "reviews" && "Read feedback from our volunteers, restaurants, and NGOs or share your own experience."}
+              {activeView === "reports" && "View visual charts, community savings audits, and download spreadsheets of SevaSetu's aggregate impact."}
+              {activeView === "help" && "Search help documents, browse accordion FAQs, read volunteer manuals, or submit a support query."}
             </p>
           </div>
         </header>
@@ -860,6 +905,25 @@ export default function App() {
                 .catch(err => triggerToast(err.message, true))
             }
             onOpenAuthModal={() => { setAuthModal(true); setAuthTab("login"); }}
+          />
+        )}
+
+        {activeView === "reviews" && (
+          <Reviews
+            user={user}
+            triggerToast={triggerToast}
+          />
+        )}
+
+        {activeView === "reports" && (
+          <Reports
+            triggerToast={triggerToast}
+          />
+        )}
+
+        {activeView === "help" && (
+          <HelpCenter
+            triggerToast={triggerToast}
           />
         )}
       </main>
