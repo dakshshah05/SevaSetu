@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { gsap } from "gsap";
 import logoPng from "../assets/logo.png";
+import DomeGallery from "./DomeGallery";
 
 export default function LandingPage({ onEnterApp, onOpenAuth }) {
   // Preloader States
@@ -516,90 +517,25 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
           </div>
         </section>
 
-        {/* 4. Expanded Dome Gallery Section with Image Descriptions */}
+        {/* 4. Interactive 3D Gesture Dome Gallery Section */}
         <section id="gallery" className="landing-section section-gallery">
-          <div className="section-container">
+          <div className="section-container" style={{ position: "relative", zIndex: 5 }}>
             <div className="section-title text-center">
-              <div className="badge-small">VISUAL GALLERY & EXPLANATIONS</div>
+              <div className="badge-small">INTERACTIVE 3D DOME SPHERE</div>
               <h2>Impact In Action</h2>
-              <p>Hover over any image below to reveal detailed explanations of each initiative.</p>
+              <p>Drag to rotate the 3D sphere gallery. Click any image tile to expand into full view.</p>
             </div>
 
-            {/* Dome Gallery Wall */}
-            <div className="dome-gallery-wrapper">
-              <div className="dome-gallery">
-                
-                {/* Item 1: Food */}
-                <div className="dome-item item-curved-1 hover-active" onClick={() => onEnterApp("food-waste")}>
-                  <img src="/gallery_food.png" alt="Ahaar Setu Feedings" />
-                  <div className="dome-info">
-                    <span className="gallery-tag">Ahaar Setu</span>
-                    <h5>Shelter Meal Distribution</h5>
-                    <p>Volunteers delivering warm surplus meals from partner restaurants directly to shelter children.</p>
-                  </div>
-                </div>
-
-                {/* Item 2: Cleanup */}
-                <div className="dome-item item-curved-2 hover-active" onClick={() => onEnterApp("cleanup-drives")}>
-                  <img src="/gallery_cleanup.png" alt="Swachh Bharat Cleanups" />
-                  <div className="dome-info">
-                    <span className="gallery-tag">Swachh Setu</span>
-                    <h5>Neighborhood Sanitation</h5>
-                    <p>Active volunteers conducting street sanitation drives and staging waste for recycling.</p>
-                  </div>
-                </div>
-
-                {/* Item 3: Education */}
-                <div className="dome-item item-curved-3 hover-active" onClick={() => onEnterApp("shiksha")}>
-                  <img src="/gallery_education.png" alt="Shiksha Setu Mentorship" />
-                  <div className="dome-info">
-                    <span className="gallery-tag">Shiksha Setu</span>
-                    <h5>Outdoor Mentoring Sessions</h5>
-                    <p>Volunteer tutors teaching math and science concepts to underprivileged children outdoors.</p>
-                  </div>
-                </div>
-
-                {/* Item 4: Medical */}
-                <div className="dome-item item-curved-4 hover-active" onClick={() => onEnterApp("swasthya")}>
-                  <img src="/gallery_medical.png" alt="Medical Checkup Camp" />
-                  <div className="dome-info">
-                    <span className="gallery-tag">Swasthya Setu</span>
-                    <h5>Free Community Medical Camps</h5>
-                    <p>Volunteer doctors providing free health checkups and distributing donated medicines.</p>
-                  </div>
-                </div>
-
-                {/* Item 5: Tree Plantation */}
-                <div className="dome-item item-curved-5 hover-active" onClick={() => onEnterApp("vriksha")}>
-                  <img src="/gallery_vriksha.png" alt="Tree Plantation Drive" />
-                  <div className="dome-info">
-                    <span className="gallery-tag">Vriksha Setu</span>
-                    <h5>Urban Reforestation</h5>
-                    <p>Citizens planting name-tagged virtual tree saplings and recording growth checks.</p>
-                  </div>
-                </div>
-
-                {/* Item 6: Animal Rescue */}
-                <div className="dome-item item-curved-6 hover-active" onClick={() => onEnterApp("pashu")}>
-                  <img src="/gallery_pashu.png" alt="Animal Rescue" />
-                  <div className="dome-info">
-                    <span className="gallery-tag">Pashu Setu</span>
-                    <h5>Stray Animal Care</h5>
-                    <p>Rescuers caring for injured stray animals and connecting them with veterinary clinic care.</p>
-                  </div>
-                </div>
-
-                {/* Item 7: Rewards */}
-                <div className="dome-item item-curved-7 hover-active" onClick={() => onEnterApp("rewards-store")}>
-                  <img src="/gallery_rewards.png" alt="Volunteer Rewards" />
-                  <div className="dome-info">
-                    <span className="gallery-tag">Rewards Store</span>
-                    <h5>Seva Points Recognition</h5>
-                    <p>Volunteers receiving certificates and partner discount vouchers for verified civic hours.</p>
-                  </div>
-                </div>
-
-              </div>
+            {/* Gesture 3D Dome Gallery Container */}
+            <div style={{ width: "100%", height: "650px", position: "relative", borderRadius: "32px", overflow: "hidden" }}>
+              <DomeGallery 
+                fit={0.65}
+                minRadius={480}
+                maxVerticalRotationDeg={10}
+                segments={34}
+                dragDampening={2}
+                grayscale={false}
+              />
             </div>
           </div>
         </section>

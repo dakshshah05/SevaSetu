@@ -1,0 +1,285 @@
+.sphere-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 520px;
+  --radius: 520px;
+  --viewer-pad: 72px;
+  --circ: calc(var(--radius) * 3.14);
+  --rot-y: calc((360deg / var(--segments-x)) / 2);
+  --rot-x: calc((360deg / var(--segments-y)) / 2);
+  --item-width: calc(var(--circ) / var(--segments-x));
+  --item-height: calc(var(--circ) / var(--segments-y));
+}
+
+.sphere-root * {
+  box-sizing: border-box;
+}
+
+.sphere,
+.item,
+.item__image {
+  transform-style: preserve-3d;
+}
+
+main.sphere-main {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  background: transparent;
+}
+
+.stage {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  perspective: calc(var(--radius) * 2);
+  perspective-origin: 50% 50%;
+  contain: layout paint size;
+}
+
+.sphere {
+  transform: translateZ(calc(var(--radius) * -1));
+  will-change: transform;
+}
+
+.overlay,
+.overlay--blur {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.overlay {
+  background-image: radial-gradient(rgba(16, 26, 17, 0) 55%, var(--overlay-blur-color, rgba(10, 20, 11, 0.75)) 100%);
+}
+
+.overlay--blur {
+  -webkit-mask-image: radial-gradient(rgba(16, 26, 17, 0) 60%, var(--overlay-blur-color, rgba(10, 20, 11, 0.75)) 90%);
+  mask-image: radial-gradient(rgba(16, 26, 17, 0) 60%, var(--overlay-blur-color, rgba(10, 20, 11, 0.75)) 90%);
+  backdrop-filter: blur(4px);
+}
+
+.item {
+  width: calc(var(--item-width) * var(--item-size-x));
+  height: calc(var(--item-height) * var(--item-size-y));
+  position: absolute;
+  top: -999px;
+  bottom: -999px;
+  left: -999px;
+  right: -999px;
+  margin: auto;
+  transform-origin: 50% 50%;
+  backface-visibility: hidden;
+  transition: transform 300ms ease;
+  transform: rotateY(calc(var(--rot-y) * (var(--offset-x) + ((var(--item-size-x) - 1) / 2)) + var(--rot-y-delta, 0deg)))
+    rotateX(calc(var(--rot-x) * (var(--offset-y) - ((var(--item-size-y) - 1) / 2)) + var(--rot-x-delta, 0deg)))
+    translateZ(var(--radius));
+}
+
+.item__image {
+  position: absolute;
+  display: block;
+  inset: 8px;
+  border-radius: var(--tile-radius, 20px);
+  background: rgba(20, 35, 22, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  overflow: hidden;
+  backface-visibility: hidden;
+  transition: transform 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  pointer-events: auto;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.item__image:hover {
+  border-color: #3bb632;
+  box-shadow: 0 12px 30px rgba(59, 182, 50, 0.4);
+}
+
+.item__image:focus {
+  outline: none;
+}
+
+.item__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  backface-visibility: hidden;
+  filter: var(--image-filter, none);
+  transition: transform 0.4s ease;
+}
+
+.item__image:hover img {
+  transform: scale(1.06);
+}
+
+/* Tile Badge Overlay */
+.tile-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px 12px;
+  background: linear-gradient(0deg, rgba(10, 20, 11, 0.95) 0%, rgba(10, 20, 11, 0.3) 70%, rgba(0,0,0,0) 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tile-tag {
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #E7E1B1;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tile-title {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.viewer {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--viewer-pad);
+}
+
+.viewer .frame {
+  height: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--enlarge-radius, 28px);
+  display: flex;
+}
+
+@media (max-aspect-ratio: 1/1) {
+  .viewer .frame {
+    height: auto;
+    width: 100%;
+  }
+}
+
+.viewer .scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: rgba(8, 16, 9, 0.65);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 400ms ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.sphere-root[data-enlarging='true'] .viewer .scrim {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.viewer .enlarge {
+  position: absolute;
+  z-index: 30;
+  border-radius: var(--enlarge-radius, 28px);
+  overflow: hidden;
+  transition:
+    transform 400ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 400ms ease;
+  transform-origin: top left;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 35px rgba(59, 182, 50, 0.4);
+  border: 1.5px solid rgba(59, 182, 50, 0.5);
+  background: rgba(16, 28, 17, 0.95);
+}
+
+.enlarge-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.enlarge-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: var(--image-filter, none);
+}
+
+.enlarge-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  background: linear-gradient(0deg, rgba(8,16,9,0.95) 0%, rgba(8,16,9,0.5) 75%, rgba(0,0,0,0) 100%);
+}
+
+.enlarge-tag {
+  display: inline-block;
+  background: rgba(59, 182, 50, 0.25);
+  border: 1px solid rgba(59, 182, 50, 0.4);
+  color: #E7E1B1;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.enlarge-info h3 {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.sphere-root .enlarge-closing img {
+  filter: var(--image-filter, none);
+}
+
+.edge-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 100px;
+  z-index: 5;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--overlay-blur-color, rgba(10, 20, 11, 0.75)));
+}
+
+.edge-fade--top {
+  top: 0;
+  transform: rotate(180deg);
+}
+
+.edge-fade--bottom {
+  bottom: 0;
+}
+
+.dg-scroll-lock {
+  overflow: hidden !important;
+}
