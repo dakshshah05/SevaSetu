@@ -7,7 +7,8 @@ import {
   getDoc as fbGetDoc, 
   updateDoc as fbUpdateDoc, 
   setDoc as fbSetDoc,
-  onSnapshot as fbOnSnapshot
+  onSnapshot as fbOnSnapshot,
+  deleteDoc as fbDeleteDoc
 } from "firebase/firestore";
 import {
   signInWithEmailAndPassword,
@@ -1689,6 +1690,51 @@ export const DB = {
       localStorage.setItem("sevasetu_reviews", JSON.stringify(list));
       notifySubscribers("reviews", list);
     }
+  },
+
+  async updateUserProfile(name) {
+    if (!currentLoggedInUser) throw new Error("No user is logged in.");
+    const uid = currentLoggedInUser.uid;
+    const updatedUser = { ...currentLoggedInUser, name };
+
+    if (isConfigValid) {
+      await fbUpdateDoc(doc(db, "users", uid), { name });
+    } else {
+      const users = JSON.parse(localStorage.getItem("sevasetu_users") || "[]");
+      const idx = users.findIndex(u => u.uid === uid);
+      if (idx !== -1) {
+        users[idx].name = name;
+        localStorage.setItem("sevasetu_users", JSON.stringify(users));
+        notifySubscribers("users", users);
+      }
+    }
+
+    currentLoggedInUser = updatedUser;
+    localStorage.setItem("sevasetu_current_user", JSON.stringify(updatedUser));
+    authChangeListeners.forEach(cb => cb(updatedUser));
+    this.triggerProfileSync(updatedUser);
+  },
+
+  async deleteUserAccount() {
+    if (!currentLoggedInUser) throw new Error("No user is logged in.");
+    const uid = currentLoggedInUser.uid;
+
+    if (isConfigValid) {
+      await fbDeleteDoc(doc(db, "users", uid));
+      const fbUser = auth.currentUser;
+      if (fbUser) {
+        await fbUser.delete();
+      }
+    } else {
+      const users = JSON.parse(localStorage.getItem("sevasetu_users") || "[]");
+      const filtered = users.filter(u => u.uid !== uid);
+      localStorage.setItem("sevasetu_users", JSON.stringify(filtered));
+      notifySubscribers("users", filtered);
+    }
+
+    currentLoggedInUser = null;
+    localStorage.removeItem("sevasetu_current_user");
+    authChangeListeners.forEach(cb => cb(null));
   }
 }
 

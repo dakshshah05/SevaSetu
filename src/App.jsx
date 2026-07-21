@@ -21,7 +21,9 @@ import {
   Activity,
   MessageSquare,
   BarChart3,
-  HelpCircle
+  HelpCircle,
+  User,
+  Settings as SettingsIcon
 } from "lucide-react";
 import { DB } from "./db";
 import { isConfigValid } from "./firebase";
@@ -47,12 +49,15 @@ import LandingPage from "./components/LandingPage";
 import Reviews from "./components/Reviews";
 import Reports from "./components/Reports";
 import HelpCenter from "./components/HelpCenter";
+import Profile from "./components/Profile";
+import Settings from "./components/Settings";
 
 export default function App() {
   // --- STATE SYSTEM ---
   const [activeView, setActiveView] = useState("dashboard");
   const [user, setUser] = useState(null);
   const [showLanding, setShowLanding] = useState(true);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -529,11 +534,15 @@ export default function App() {
         </nav>
 
         {user ? (
-          <div className="taskbar-profile">
+          <div 
+            className="taskbar-profile" 
+            onClick={() => setShowProfileDropdown(prev => !prev)}
+            style={{ position: "relative", cursor: "pointer" }}
+          >
             <div className="taskbar-user-avatar">{user.name.charAt(0).toUpperCase()}</div>
-            <div className="taskbar-user-info">
+            <div className="taskbar-user-info" style={{ marginRight: "6px" }}>
               <h5>{user.name}</h5>
-              <span>{user.role}</span>
+              <span style={{ textTransform: "capitalize" }}>{user.role}</span>
             </div>
             {user.role === "volunteer" && (
               <div className="taskbar-points-badge">
@@ -547,9 +556,51 @@ export default function App() {
                 <span>{user.sevaPoints || 0} Seva Pts</span>
               </div>
             )}
-            <button className="btn btn-secondary" onClick={handleLogoutClick} style={{ padding: "4px 8px", fontSize: "11px", marginLeft: "4px" }}>
-              <LogOut size={12} />
-            </button>
+
+            {/* Profile Dropdown Menu */}
+            {showProfileDropdown && (
+              <div 
+                className="card"
+                style={{
+                  position: "absolute",
+                  top: "calc(100% + 10px)",
+                  right: 0,
+                  width: "160px",
+                  padding: "8px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "6px",
+                  zIndex: 200,
+                  animation: "slideInChat 0.2s cubic-bezier(0.25, 0.8, 0.25, 1)",
+                  background: "linear-gradient(135deg, var(--color-beige-light) 0%, #f4edd0 100%)",
+                  border: "none",
+                  boxShadow: "8px 8px 20px rgba(180, 172, 130, 0.4), -8px -8px 20px #ffffff"
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button 
+                  className="btn btn-secondary" 
+                  onClick={() => { setActiveView("profile"); setShowProfileDropdown(false); }}
+                  style={{ justifyContent: "flex-start", width: "100%", padding: "8px 12px", fontSize: "11px" }}
+                >
+                  <User size={12} /> My Profile
+                </button>
+                <button 
+                  className="btn btn-secondary" 
+                  onClick={() => { setActiveView("settings"); setShowProfileDropdown(false); }}
+                  style={{ justifyContent: "flex-start", width: "100%", padding: "8px 12px", fontSize: "11px" }}
+                >
+                  <SettingsIcon size={12} /> Settings
+                </button>
+                <button 
+                  className="btn btn-secondary" 
+                  onClick={() => { handleLogoutClick(); setShowProfileDropdown(false); }}
+                  style={{ justifyContent: "flex-start", width: "100%", padding: "8px 12px", fontSize: "11px", color: "#ef4444" }}
+                >
+                  <LogOut size={12} /> Logout
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <button className="btn btn-primary" onClick={() => { setAuthModal(true); setAuthTab("login"); }} style={{ padding: "8px 16px", fontSize: "12px" }}>
@@ -579,6 +630,8 @@ export default function App() {
               {activeView === "reviews" && "Community Reviews"}
               {activeView === "reports" && "Impact & Savings Reports"}
               {activeView === "help" && "Help Center & FAQs"}
+              {activeView === "profile" && "My Profile"}
+              {activeView === "settings" && "Account Settings"}
             </h1>
             <p style={{ marginTop: "4px" }}>
               {activeView === "dashboard" && "Overview of community impact, leaderboards, and collaborative modules."}
@@ -597,6 +650,8 @@ export default function App() {
               {activeView === "reviews" && "Read feedback from our volunteers, restaurants, and NGOs or share your own experience."}
               {activeView === "reports" && "View visual charts, community savings audits, and download spreadsheets of SevaSetu's aggregate impact."}
               {activeView === "help" && "Search help documents, browse accordion FAQs, read volunteer manuals, or submit a support query."}
+              {activeView === "profile" && "View your civic achievements, role credentials, and milestone rewards."}
+              {activeView === "settings" && "Manage display credentials, security actions, and account parameters."}
             </p>
           </div>
         </header>
@@ -924,6 +979,25 @@ export default function App() {
         {activeView === "help" && (
           <HelpCenter
             triggerToast={triggerToast}
+          />
+        )}
+
+        {activeView === "profile" && (
+          <Profile
+            user={user}
+            onUpgradeToVolunteer={handleUpgradeToVolunteer}
+          />
+        )}
+
+        {activeView === "settings" && (
+          <Settings
+            user={user}
+            triggerToast={triggerToast}
+            onDeleteAccountSuccess={() => {
+              setUser(null);
+              setActiveView("dashboard");
+              setShowLanding(true);
+            }}
           />
         )}
       </main>
