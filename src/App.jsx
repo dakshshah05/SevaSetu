@@ -346,6 +346,32 @@ export default function App() {
           <span className="logo-text">SevaSetu</span>
         </div>
 
+        {/* Mobile Navigation Select Bar (visible on mobile screens) */}
+        <div className="mobile-nav-wrapper">
+          <select 
+            className="mobile-nav-select" 
+            value={activeView} 
+            onChange={(e) => setActiveView(e.target.value)}
+          >
+            <option value="dashboard">📊 Dashboard</option>
+            <option value="food-waste">🍲 Ahaar Setu (Food)</option>
+            <option value="cleanup-drives">🧹 Swachh Setu (Sanitation)</option>
+            <option value="ngo-admin">🤝 Sahaayak Setu (NGOs)</option>
+            <option value="shiksha">🎓 Shiksha Setu (Education)</option>
+            <option value="swasthya">🩺 Swasthya Setu (Health)</option>
+            <option value="vastra">👕 Vastra Setu (Clothes)</option>
+            <option value="punya">❤️ Punya Setu (Elderly)</option>
+            <option value="vriksha">🌱 Vriksha Setu (Trees)</option>
+            <option value="pashu">🐾 Pashu Setu (Animals)</option>
+            <option value="crowd">🪙 NGO Crowdfunding</option>
+            <option value="sos">🚨 Emergency SOS</option>
+            <option value="rewards-store">🎁 Rewards Store</option>
+            <option value="reviews">💬 Reviews</option>
+            <option value="reports">📈 Reports & Charts</option>
+            <option value="help">❓ Help Center</option>
+          </select>
+        </div>
+
         <nav className="taskbar-nav" onMouseLeave={() => setHoveredIndex(null)}>
           {/* Absolute sliding highlight background */}
           <div className="nav-highlight-pill" style={pillStyle} />

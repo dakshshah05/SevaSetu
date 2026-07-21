@@ -2554,4 +2554,114 @@ select.form-control option {
   }
 }
 
+/* --- MOBILE RESPONSIVE DESIGN & TASKBAR DROPDOWN SYSTEM --- */
+.mobile-nav-wrapper {
+  display: none;
+}
+
+.mobile-nav-select {
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-green-dark);
+  background: linear-gradient(135deg, var(--color-beige-light) 0%, #f4edd0 100%);
+  border: none;
+  border-radius: var(--radius-md);
+  box-shadow: inset 3px 3px 6px rgba(180, 172, 130, 0.4), inset -3px -3px 6px #ffffff;
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+  max-width: 240px;
+}
+
+@media (max-width: 900px) {
+  .dashboard-columns {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Taskbar mobile responsiveness */
+  .top-taskbar {
+    padding: 10px 14px !important;
+    gap: 10px !important;
+  }
+  
+  .taskbar-nav {
+    display: none !important; /* Hide horizontal scrollbar bar on mobile */
+  }
+
+  .mobile-nav-wrapper {
+    display: flex !important;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .taskbar-profile {
+    padding: 4px 8px !important;
+  }
+
+  .taskbar-user-info {
+    display: none !important; /* Keep avatar and points, hide long text on small screens */
+  }
+
+  /* Content area mobile paddings & titles */
+  .main-content {
+    padding: 16px 12px !important;
+  }
+
+  .content-header {
+    margin-bottom: 16px !important;
+  }
+
+  .content-header h1 {
+    font-size: 20px !important;
+  }
+
+  .content-header p {
+    font-size: 11px !important;
+  }
+
+  /* Force all grid containers to single column vertical stack */
+  .dashboard-columns,
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Card padding reduction for mobile */
+  .card {
+    padding: 16px !important;
+    border-radius: 20px !important;
+  }
+
+  .stat-card {
+    padding: 14px !important;
+  }
+
+  /* Form & input field responsiveness */
+  .form-group input,
+  .form-group select,
+  .form-group textarea,
+  .form-control {
+    font-size: 13px !important;
+  }
+
+  /* Modal responsive sizing */
+  .modal-content {
+    width: 92% !important;
+    max-width: 100% !important;
+    margin: 16px auto !important;
+    padding: 20px 16px !important;
+    border-radius: 24px !important;
+  }
+
+  /* Chatbot window responsive scaling */
+  .chatbot-window {
+    width: calc(100vw - 24px) !important;
+    height: 480px !important;
+    right: 12px !important;
+    bottom: 12px !important;
+  }
+}
+
 

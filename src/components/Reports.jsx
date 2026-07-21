@@ -387,63 +387,63 @@ export default function Reports({ triggerToast }) {
 
             {/* Custom Claymorphism Dynamic SVG Bar Chart */}
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              <div style={{ position: "relative", height: "220px", width: "100%", padding: "10px 0 20px 0" }}>
-                <svg width="100%" height="100%" style={{ overflow: "visible" }}>
+              <div style={{ position: "relative", width: "100%", padding: "10px 0 10px 0", overflow: "hidden" }}>
+                <svg viewBox="0 0 600 240" preserveAspectRatio="xMidYMid meet" width="100%" height="auto" style={{ overflow: "hidden" }}>
                   {/* Grid Lines */}
                   {Array.from({ length: 5 }).map((_, i) => {
-                    const yPos = 20 + i * 40;
+                    const yPos = 25 + i * 37.5;
                     const gridValue = Math.round(currentDataset.yMax - (i * currentDataset.yMax) / 4);
                     return (
                       <g key={i}>
-                        <line x1="40" y1={yPos} x2="100%" y2={yPos} stroke="rgba(48, 109, 41, 0.15)" strokeWidth="1" strokeDasharray="4 4" />
-                        <text x="32" y={yPos + 4} textAnchor="end" fontSize="10" fill="var(--color-green-dark)" fontWeight="700">
+                        <line x1="45" y1={yPos} x2="590" y2={yPos} stroke="rgba(48, 109, 41, 0.15)" strokeWidth="1" strokeDasharray="4 4" />
+                        <text x="36" y={yPos + 4} textAnchor="end" fontSize="11" fill="var(--color-green-dark)" fontWeight="700">
                           {gridValue >= 1000 ? `${(gridValue / 1000).toFixed(1)}k` : gridValue}
                         </text>
                       </g>
                     );
                   })}
 
-                  {/* Draw the Vertical Bars */}
+                  {/* Draw the Vertical Bars with precise bounded coordinates */}
                   {currentDataset.values.map((val, idx) => {
                     const colCount = currentDataset.values.length;
-                    const startX = 50;
-                    const barWidth = timeframe === "yearly" ? 18 : 28;
-                    const spacing = (100 / colCount); // percentage-based spacing
+                    const plotWidth = 535;
+                    const colWidth = plotWidth / colCount;
+                    const barWidth = Math.min(timeframe === "yearly" ? 22 : 36, colWidth - 8);
+                    const barX = 55 + idx * colWidth + (colWidth / 2);
                     
-                    const xPercent = `${startX + idx * (88 / (colCount - 1 || 1))}%`;
-                    const percentHeight = Math.min((val / currentDataset.yMax) * 160, 160);
-                    const yPos = 180 - percentHeight;
+                    const maxBarHeight = 135;
+                    const percentHeight = Math.max(8, Math.min((val / currentDataset.yMax) * maxBarHeight, maxBarHeight));
+                    const yPos = 175 - percentHeight;
 
                     return (
                       <g key={idx}>
-                        {/* Outset 3D Clay Bar (simulated by stacking rectangles with gradients) */}
+                        {/* Outset 3D Clay Bar */}
                         <rect
-                          x={xPercent}
+                          x={barX - barWidth / 2}
                           y={yPos}
                           width={barWidth}
                           height={percentHeight}
-                          rx={barWidth / 2}
+                          rx={barWidth > 16 ? 10 : 6}
                           fill="url(#clayBarGradient)"
                           filter="url(#clayShadowFilter)"
-                          transform={`translate(${-barWidth/2}, 0)`}
                         />
-                        {/* Grid labels */}
+                        {/* Grid X Labels */}
                         <text
-                          x={xPercent}
+                          x={barX}
                           y="198"
                           textAnchor="middle"
-                          fontSize="10"
+                          fontSize="11"
                           fontWeight="700"
                           fill="var(--color-green-dark)"
                         >
                           {currentDataset.labels[idx]}
                         </text>
-                        {/* Hover values */}
+                        {/* Metric Value Badges */}
                         <text
-                          x={xPercent}
-                          y={yPos - 6}
+                          x={barX}
+                          y={Math.max(18, yPos - 6)}
                           textAnchor="middle"
-                          fontSize="9"
+                          fontSize="10"
                           fontWeight="800"
                           fill="var(--color-green-medium)"
                         >
@@ -460,7 +460,7 @@ export default function Reports({ triggerToast }) {
                       <stop offset="40%" stopColor="#306d29" />
                       <stop offset="100%" stopColor="#0d530e" />
                     </linearGradient>
-                    <filter id="clayShadowFilter" x="-10%" y="-10%" width="130%" height="130%">
+                    <filter id="clayShadowFilter" x="-20%" y="-20%" width="140%" height="140%">
                       <feDropShadow dx="2" dy="2" stdDeviation="2" floodColor="#000" floodOpacity="0.15" />
                       <feDropShadow dx="-2" dy="-2" stdDeviation="2" floodColor="#fff" floodOpacity="0.5" />
                     </filter>
