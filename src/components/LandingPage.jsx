@@ -15,7 +15,15 @@ import {
   MessageSquare,
   Utensils,
   Trash2,
-  GraduationCap
+  Building,
+  GraduationCap,
+  Stethoscope,
+  Shirt,
+  Heart,
+  Sprout,
+  PawPrint,
+  Coins,
+  Gift
 } from "lucide-react";
 import { gsap } from "gsap";
 import logoPng from "../assets/logo.png";
@@ -41,7 +49,6 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
       setProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
-          // Trigger GSAP entrance animation for the page
           setTimeout(() => {
             gsap.to(loaderRef.current, {
               yPercent: -100,
@@ -74,7 +81,6 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
     };
 
     const updateFollower = () => {
-      // Smooth interpolation (lerp)
       followerX += (mouseX - followerX) * 0.1;
       followerY += (mouseY - followerY) * 0.1;
       if (follower) {
@@ -86,7 +92,6 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
     window.addEventListener("mousemove", onMouseMove);
     const animationFrame = requestAnimationFrame(updateFollower);
 
-    // Hover detection for scaling the cursor
     const handleMouseOver = (e) => {
       const target = e.target;
       if (
@@ -202,8 +207,8 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
             </h1>
             
             <p className="landing-subtitle">
-              A premium, rewards-driven platform bridge that coordinates surplus food redistribution, 
-              organizes cleanup drives, schedules medical camps, and recruits mentors.
+              A premium, rewards-driven platform bridging restaurants with food surplus, 
+              organizing sanitation drives, scheduling medical camps, and matching volunteers with local social needs.
             </p>
 
             <div className="landing-hero-actions">
@@ -232,26 +237,26 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                 <div className="badge-small">WHAT WE DO</div>
                 <h2>A Unified Gateway to <span className="highlight-text">Social Welfare</span></h2>
                 <p>
-                  SevaSetu was built to solve fragmentation in civic work. Instead of separate channels 
-                  for donating food, tutoring, and requesting emergency help, we unify these efforts 
-                  into a single cohesive system.
+                  SevaSetu solves fragmentation in civic work. Instead of separate apps for food donations, 
+                  education, cleanup drives, and emergency assistance, we bring 12 complete civic modules 
+                  under one gamified roof.
                 </p>
                 <p className="secondary-text">
-                  Our system leverages gamified Seva points to motivate community actions. Volunteers earn 
-                  points and certificates validation by partner NGOs, which they can redeem at our Voucher Store.
+                  Volunteers and NGOs earn Seva points for validated contributions, which can be exchanged 
+                  in our Voucher Store for real partner discount codes.
                 </p>
                 <div className="about-highlights">
                   <div className="highlight-item">
                     <CheckCircle size={16} />
-                    <span>Real-time surplus food matching</span>
+                    <span>Real-time surplus food matching and pickup routing</span>
                   </div>
                   <div className="highlight-item">
                     <CheckCircle size={16} />
-                    <span>Volunteer rosters & NGO validations</span>
+                    <span>12 integrated civic welfare modules & NGO rosters</span>
                   </div>
                   <div className="highlight-item">
                     <CheckCircle size={16} />
-                    <span>Emergency SOS broadcasts</span>
+                    <span>Instant emergency SOS alerts and reward vouchers</span>
                   </div>
                 </div>
               </div>
@@ -289,16 +294,20 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
           </div>
         </section>
 
-        {/* 3. Stacked Scroll Initiatives Section */}
+        {/* 3. Stacked Scroll Initiatives Section (All 12 Modules) */}
         <section id="modules" className="landing-section section-modules">
           <div className="section-container">
             <div className="section-title">
-              <div className="badge-small">CORE MODULES</div>
-              <h2>Our Dedicated Pillars</h2>
+              <div className="badge-small">ALL 12 PLATFORM INITIATIVES</div>
+              <h2>Complete Civic Ecosystem</h2>
+              <p style={{ color: "rgba(255,255,255,0.6)", marginTop: "8px" }}>
+                Scroll down to explore all 12 modules integrated into SevaSetu.
+              </p>
             </div>
             
             <div className="stack-container">
-              {/* Card 1: Ahaar Setu */}
+
+              {/* Module 1: Ahaar Setu */}
               <div className="stack-card card-ahaar">
                 <div className="card-bg-glow"></div>
                 <div className="stack-card-content">
@@ -306,17 +315,17 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                     <Utensils size={32} />
                   </div>
                   <h3>Ahaar Setu</h3>
-                  <h4>Surplus Food Redistribution</h4>
+                  <h4>Food Waste Surplus Redistribution</h4>
                   <p>
-                    Connecting restaurants and catering services directly with local volunteer squads and 
-                    underprivileged shelter homes. Restaurants register surplus food, routes are dynamically locked 
-                    by volunteer claims, and deliveries are validated to prevent waste and solve hunger.
+                    Connects restaurants, wedding venues, and caterers with local volunteer squads and shelter homes. 
+                    Restaurants broadcast excess food alerts, volunteers lock transit routes, and shelter feedings 
+                    are verified in real-time.
                   </p>
                   <button className="btn-card-action" onClick={onEnterApp}>Launch Ahaar Setu</button>
                 </div>
               </div>
 
-              {/* Card 2: Swachh Setu */}
+              {/* Module 2: Swachh Setu */}
               <div className="stack-card card-swachh">
                 <div className="card-bg-glow"></div>
                 <div className="stack-card-content">
@@ -326,15 +335,31 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                   <h3>Swachh Setu</h3>
                   <h4>Sanitation & Cleanup Campaigns</h4>
                   <p>
-                    Empowering volunteers to organize or sign up for sanitation campaigns in their neighborhoods. 
-                    Volunteers submit before-and-after photo evidence via local sandbox uploads, which are reviewed 
-                    by local NGOs to award verified points to the cleanup squad.
+                    Organizes local community cleanup drives. Volunteers enlist for sanitation events, upload before-and-after 
+                    photographic proof, and earn validated Seva points upon NGO approval.
                   </p>
                   <button className="btn-card-action" onClick={onEnterApp}>Launch Swachh Setu</button>
                 </div>
               </div>
 
-              {/* Card 3: Shiksha Setu */}
+              {/* Module 3: Sahaayak Setu */}
+              <div className="stack-card card-sahaayak">
+                <div className="card-bg-glow"></div>
+                <div className="stack-card-content">
+                  <div className="stack-icon-box">
+                    <Building size={32} />
+                  </div>
+                  <h3>Sahaayak Setu</h3>
+                  <h4>NGO Resource & Micro-Task Management</h4>
+                  <p>
+                    Empowers verified NGOs to recruit volunteers, roster skilled talent (design, logistics, legal), 
+                    and publish micro-tasks to streamline grassroots operations.
+                  </p>
+                  <button className="btn-card-action" onClick={onEnterApp}>Launch Sahaayak Setu</button>
+                </div>
+              </div>
+
+              {/* Module 4: Shiksha Setu */}
               <div className="stack-card card-shiksha">
                 <div className="card-bg-glow"></div>
                 <div className="stack-card-content">
@@ -342,52 +367,238 @@ export default function LandingPage({ onEnterApp, onOpenAuth }) {
                     <GraduationCap size={32} />
                   </div>
                   <h3>Shiksha Setu</h3>
-                  <h4>Academic Mentoring Network</h4>
+                  <h4>Academic Mentoring & Tutoring</h4>
                   <p>
-                    Connecting volunteer tutors with underprivileged children who lack academic resources or support. 
-                    Tutors submit subjects and locations, parents file help requests, and matched sessions deliver 
-                    one-on-one education to foster high-impact learning.
+                    Matches volunteer tutors with underprivileged children who lack academic support. 
+                    Tutors submit subjects and locations, parents request sessions, and direct 1-on-1 learning is scheduled.
                   </p>
                   <button className="btn-card-action" onClick={onEnterApp}>Launch Shiksha Setu</button>
                 </div>
               </div>
+
+              {/* Module 5: Swasthya Setu */}
+              <div className="stack-card card-swasthya">
+                <div className="card-bg-glow"></div>
+                <div className="stack-card-content">
+                  <div className="stack-icon-box">
+                    <Stethoscope size={32} />
+                  </div>
+                  <h3>Swasthya Setu</h3>
+                  <h4>Free Medical Checkup Camps & Surplus Medicine</h4>
+                  <p>
+                    Coordinates free health screening camps with volunteer doctors, generates digital patient tokens, 
+                    and facilitates surplus unexpired medicine donations to needy clinics.
+                  </p>
+                  <button className="btn-card-action" onClick={onEnterApp}>Launch Swasthya Setu</button>
+                </div>
+              </div>
+
+              {/* Module 6: Vastra Setu */}
+              <div className="stack-card card-vastra">
+                <div className="card-bg-glow"></div>
+                <div className="stack-card-content">
+                  <div className="stack-icon-box">
+                    <Shirt size={32} />
+                  </div>
+                  <h3>Vastra Setu</h3>
+                  <h4>Clothing, Blanket & Book Donations</h4>
+                  <p>
+                    Facilitates neighborhood donation drives for gently-used clothing, winter blankets, and children's books, 
+                    enabling volunteer pickup and shelter distribution.
+                  </p>
+                  <button className="btn-card-action" onClick={onEnterApp}>Launch Vastra Setu</button>
+                </div>
+              </div>
+
+              {/* Module 7: Punya Setu */}
+              <div className="stack-card card-punya">
+                <div className="card-bg-glow"></div>
+                <div className="stack-card-content">
+                  <div className="stack-icon-box">
+                    <Heart size={32} />
+                  </div>
+                  <h3>Punya Setu</h3>
+                  <h4>Elderly Care & Companionship</h4>
+                  <p>
+                    Pairs volunteer companions with local senior citizens needing grocery pickup assistance, home check-ins, 
+                    or friendly conversations.
+                  </p>
+                  <button className="btn-card-action" onClick={onEnterApp}>Launch Punya Setu</button>
+                </div>
+              </div>
+
+              {/* Module 8: Vriksha Setu */}
+              <div className="stack-card card-vriksha">
+                <div className="card-bg-glow"></div>
+                <div className="stack-card-content">
+                  <div className="stack-icon-box">
+                    <Sprout size={32} />
+                  </div>
+                  <h3>Vriksha Setu</h3>
+                  <h4>Tree Reforestation & Growth Tracking</h4>
+                  <p>
+                    Organizes urban tree planting drives where citizens plant virtual name-labeled trees, log physical 
+                    sapling growth checks, and earn points as trees mature.
+                  </p>
+                  <button className="btn-card-action" onClick={onEnterApp}>Launch Vriksha Setu</button>
+                </div>
+              </div>
+
+              {/* Module 9: Pashu Setu */}
+              <div className="stack-card card-pashu">
+                <div className="card-bg-glow"></div>
+                <div className="stack-card-content">
+                  <div className="stack-icon-box">
+                    <PawPrint size={32} />
+                  </div>
+                  <h3>Pashu Setu</h3>
+                  <h4>Stray Animal Rescue & Adoption</h4>
+                  <p>
+                    Allows citizens to report injured stray animals with location photos, dispatches nearby rescuers, 
+                    provides a vet clinic directory, and lists pets for adoption.
+                  </p>
+                  <button className="btn-card-action" onClick={onEnterApp}>Launch Pashu Setu</button>
+                </div>
+              </div>
+
+              {/* Module 10: Punya Crowdfund */}
+              <div className="stack-card card-crowd">
+                <div className="card-bg-glow"></div>
+                <div className="stack-card-content">
+                  <div className="stack-icon-box">
+                    <Coins size={32} />
+                  </div>
+                  <h3>Punya Crowdfund</h3>
+                  <h4>100% Transparent NGO Crowdfunding</h4>
+                  <p>
+                    Enables verified NGOs to create emergency funding campaigns. Donors track exact fund allocations 
+                    and receive photographic receipt proof for total transparency.
+                  </p>
+                  <button className="btn-card-action" onClick={onEnterApp}>Launch Crowdfund</button>
+                </div>
+              </div>
+
+              {/* Module 11: Emergency SOS */}
+              <div className="stack-card card-sos">
+                <div className="card-bg-glow"></div>
+                <div className="stack-card-content">
+                  <div className="stack-icon-box">
+                    <ShieldAlert size={32} />
+                  </div>
+                  <h3>Emergency SOS</h3>
+                  <h4>Real-Time Emergency Relief Broadcasts</h4>
+                  <p>
+                    Instant geo-targeted SOS alert system for disaster relief, blood shortage emergencies, or rapid volunteer 
+                    mobilization in crisis zones.
+                  </p>
+                  <button className="btn-card-action" onClick={onEnterApp}>Launch Emergency SOS</button>
+                </div>
+              </div>
+
+              {/* Module 12: Voucher Store Rewards */}
+              <div className="stack-card card-rewards">
+                <div className="card-bg-glow"></div>
+                <div className="stack-card-content">
+                  <div className="stack-icon-box">
+                    <Gift size={32} />
+                  </div>
+                  <h3>Rewards Marketplace</h3>
+                  <h4>Seva Points & Partner Vouchers</h4>
+                  <p>
+                    The gamified heart of SevaSetu. Convert points earned from civic work into exclusive discount promo codes 
+                    sponsored by partner restaurants and corporate sponsors.
+                  </p>
+                  <button className="btn-card-action" onClick={onEnterApp}>Launch Rewards Store</button>
+                </div>
+              </div>
+
             </div>
           </div>
         </section>
 
-        {/* 4. Dome Gallery Section */}
+        {/* 4. Expanded Dome Gallery Section with Image Descriptions */}
         <section id="gallery" className="landing-section section-gallery">
           <div className="section-container">
             <div className="section-title text-center">
-              <div className="badge-small">VISUAL GALLERY</div>
+              <div className="badge-small">VISUAL GALLERY & EXPLANATIONS</div>
               <h2>Impact In Action</h2>
-              <p>Real-world moments of our community volunteers and partner initiatives.</p>
+              <p>Hover over any image below to reveal detailed explanations of each initiative.</p>
             </div>
 
-            {/* The Dome/Perspective Curved Wall Gallery */}
+            {/* Dome Gallery Wall */}
             <div className="dome-gallery-wrapper">
               <div className="dome-gallery">
-                <div className="dome-item item-left">
-                  <img src="/gallery_food.png" alt="Volunteers serving food" />
+                
+                {/* Item 1: Food */}
+                <div className="dome-item item-curved-1">
+                  <img src="/gallery_food.png" alt="Ahaar Setu Feedings" />
                   <div className="dome-info">
-                    <h5>Ahaar Setu Feedings</h5>
-                    <p>Community dinner distributions</p>
+                    <span className="gallery-tag">Ahaar Setu</span>
+                    <h5>Shelter Meal Distribution</h5>
+                    <p>Volunteers delivering warm surplus meals from partner restaurants directly to shelter children.</p>
                   </div>
                 </div>
-                <div className="dome-item item-center">
-                  <img src="/gallery_cleanup.png" alt="Volunteers cleaning streets" />
+
+                {/* Item 2: Cleanup */}
+                <div className="dome-item item-curved-2">
+                  <img src="/gallery_cleanup.png" alt="Swachh Bharat Cleanups" />
                   <div className="dome-info">
-                    <h5>Swachh Bharat Cleanups</h5>
-                    <p>Weekly sanitation campaigns</p>
+                    <span className="gallery-tag">Swachh Setu</span>
+                    <h5>Neighborhood Sanitation</h5>
+                    <p>Active volunteers conducting street sanitation drives and staging waste for recycling.</p>
                   </div>
                 </div>
-                <div className="dome-item item-right">
-                  <img src="/gallery_education.png" alt="Volunteer teaching children" />
+
+                {/* Item 3: Education */}
+                <div className="dome-item item-curved-3">
+                  <img src="/gallery_education.png" alt="Shiksha Setu Mentorship" />
                   <div className="dome-info">
-                    <h5>Shiksha Setu Mentorship</h5>
-                    <p>Outdoor tutoring sessions</p>
+                    <span className="gallery-tag">Shiksha Setu</span>
+                    <h5>Outdoor Mentoring Sessions</h5>
+                    <p>Volunteer tutors teaching math and science concepts to underprivileged children outdoors.</p>
                   </div>
                 </div>
+
+                {/* Item 4: Medical */}
+                <div className="dome-item item-curved-4">
+                  <img src="/gallery_medical.png" alt="Medical Checkup Camp" />
+                  <div className="dome-info">
+                    <span className="gallery-tag">Swasthya Setu</span>
+                    <h5>Free Community Medical Camps</h5>
+                    <p>Volunteer doctors providing free health checkups and distributing donated medicines.</p>
+                  </div>
+                </div>
+
+                {/* Item 5: Tree Plantation */}
+                <div className="dome-item item-curved-5">
+                  <img src="/gallery_vriksha.png" alt="Tree Plantation Drive" />
+                  <div className="dome-info">
+                    <span className="gallery-tag">Vriksha Setu</span>
+                    <h5>Urban Reforestation</h5>
+                    <p>Citizens planting name-tagged virtual tree saplings and recording growth checks.</p>
+                  </div>
+                </div>
+
+                {/* Item 6: Animal Rescue */}
+                <div className="dome-item item-curved-6">
+                  <img src="/gallery_pashu.png" alt="Animal Rescue" />
+                  <div className="dome-info">
+                    <span className="gallery-tag">Pashu Setu</span>
+                    <h5>Stray Animal Care</h5>
+                    <p>Rescuers caring for injured stray animals and connecting them with veterinary clinic care.</p>
+                  </div>
+                </div>
+
+                {/* Item 7: Rewards */}
+                <div className="dome-item item-curved-7">
+                  <img src="/gallery_rewards.png" alt="Volunteer Rewards" />
+                  <div className="dome-info">
+                    <span className="gallery-tag">Rewards Store</span>
+                    <h5>Seva Points Recognition</h5>
+                    <p>Volunteers receiving certificates and partner discount vouchers for verified civic hours.</p>
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
