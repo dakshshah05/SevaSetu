@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { createPortal } from "react-dom";
-import { Calendar, MapPin, Plus, Upload } from "lucide-react";
+import { Calendar, MapPin, Plus, Upload, Camera, FolderPlus, Image as ImageIcon, Trash2 } from "lucide-react";
 
 export default function SwachhSetu({ 
   user, 
@@ -15,12 +15,33 @@ export default function SwachhSetu({
   const [proofModal, setProofModal] = useState(false);
   const [selectedDriveId, setSelectedDriveId] = useState("");
   
+  // File input refs for live camera & gallery selection
+  const beforeCameraRef = useRef(null);
+  const beforeGalleryRef = useRef(null);
+  const afterCameraRef = useRef(null);
+  const afterGalleryRef = useRef(null);
+
   // Form states
   const [driveForm, setDriveForm] = useState({ title: "", description: "", date: "", time: "", location: "", points: 50 });
   const [proofForm, setProofForm] = useState({ beforeUrl: "", afterUrl: "", kgCollected: 25, sqCleaned: 50 });
   
   // Local before/after toggle state for mock view
   const [photoToggles, setPhotoToggles] = useState({});
+
+  // File Upload / Camera Processing Helper
+  const handleFileSelect = (e, field) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (uploadEvent) => {
+        setProofForm(prev => ({
+          ...prev,
+          [field]: uploadEvent.target.result
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleCreateDrive = (e) => {
     e.preventDefault();
@@ -313,57 +334,183 @@ export default function SwachhSetu({
       {/* Upload proof modal */}
       {proofModal && createPortal(
         <div className="modal-overlay">
-          <div className="modal-content">
+          <div className="modal-content" style={{ maxWidth: "600px" }}>
             <div className="modal-header">
               <h3>Upload Cleanup Proof</h3>
               <button className="modal-close" onClick={() => setProofModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleCreateProof}>
-                <div className="form-group">
-                  <label>Before Photo URL</label>
+                
+                {/* 1. BEFORE PHOTO INPUT (CAMERA + GALLERY + PREVIEW) */}
+                <div className="form-group" style={{ background: "rgba(255, 255, 255, 0.6)", padding: "14px", borderRadius: "16px", border: "1px solid var(--color-beige-dark)" }}>
+                  <label style={{ fontWeight: "700", color: "#dc2626", display: "flex", alignItems: "center", gap: "6px" }}>
+                    ⚠️ BEFORE CLEANUP PHOTO
+                  </label>
+
+                  {/* Hidden Inputs */}
                   <input 
-                    type="url" 
+                    type="file" 
+                    accept="image/*" 
+                    capture="environment" 
+                    ref={beforeCameraRef} 
+                    style={{ display: "none" }} 
+                    onChange={e => handleFileSelect(e, "beforeUrl")}
+                  />
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    ref={beforeGalleryRef} 
+                    style={{ display: "none" }} 
+                    onChange={e => handleFileSelect(e, "beforeUrl")}
+                  />
+
+                  {/* Action Buttons */}
+                  <div style={{ display: "flex", gap: "10px", marginTop: "8px", marginBottom: "8px" }}>
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary" 
+                      onClick={() => beforeCameraRef.current?.click()}
+                      style={{ flex: 1, padding: "8px 12px", fontSize: "11px", gap: "6px", background: "linear-gradient(135deg, #15803d, #0d530e)", color: "#ffffff", fontWeight: "700" }}
+                    >
+                      <Camera size={14} /> 📷 Take Live Photo
+                    </button>
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary" 
+                      onClick={() => beforeGalleryRef.current?.click()}
+                      style={{ flex: 1, padding: "8px 12px", fontSize: "11px", gap: "6px", background: "var(--color-beige-light)", color: "var(--color-green-dark)" }}
+                    >
+                      <FolderPlus size={14} /> 📁 Upload from Gallery
+                    </button>
+                  </div>
+
+                  {/* Text URL Option */}
+                  <input 
+                    type="text" 
                     className="form-control" 
-                    placeholder="https://images.unsplash.com/photo-1611284446314-60a58ac0deb9" 
+                    placeholder="Or paste web image URL..." 
                     value={proofForm.beforeUrl}
                     onChange={e => setProofForm({...proofForm, beforeUrl: e.target.value})}
-                    required
+                    style={{ fontSize: "11px" }}
                   />
+
+                  {/* Live Photo Preview */}
+                  {proofForm.beforeUrl && (
+                    <div style={{ marginTop: "10px", position: "relative", height: "120px", borderRadius: "10px", overflow: "hidden", border: "2px solid #dc2626" }}>
+                      <img src={proofForm.beforeUrl} alt="Before Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <button 
+                        type="button" 
+                        onClick={() => setProofForm(prev => ({ ...prev, beforeUrl: "" }))}
+                        style={{ position: "absolute", top: "6px", right: "6px", background: "#dc2626", color: "#fff", border: "none", borderRadius: "50%", width: "24px", height: "24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                        title="Remove Photo"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                      <span style={{ position: "absolute", bottom: "6px", left: "6px", background: "rgba(0,0,0,0.7)", color: "#fff", padding: "2px 6px", fontSize: "9px", borderRadius: "4px" }}>
+                        Before Photo Attached
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <div className="form-group">
-                  <label>After Photo URL</label>
+
+                {/* 2. AFTER PHOTO INPUT (CAMERA + GALLERY + PREVIEW) */}
+                <div className="form-group" style={{ background: "rgba(255, 255, 255, 0.6)", padding: "14px", borderRadius: "16px", border: "1px solid var(--color-beige-dark)", marginTop: "12px" }}>
+                  <label style={{ fontWeight: "700", color: "#15803d", display: "flex", alignItems: "center", gap: "6px" }}>
+                    ✨ AFTER CLEANUP PHOTO
+                  </label>
+
+                  {/* Hidden Inputs */}
                   <input 
-                    type="url" 
+                    type="file" 
+                    accept="image/*" 
+                    capture="environment" 
+                    ref={afterCameraRef} 
+                    style={{ display: "none" }} 
+                    onChange={e => handleFileSelect(e, "afterUrl")}
+                  />
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    ref={afterGalleryRef} 
+                    style={{ display: "none" }} 
+                    onChange={e => handleFileSelect(e, "afterUrl")}
+                  />
+
+                  {/* Action Buttons */}
+                  <div style={{ display: "flex", gap: "10px", marginTop: "8px", marginBottom: "8px" }}>
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary" 
+                      onClick={() => afterCameraRef.current?.click()}
+                      style={{ flex: 1, padding: "8px 12px", fontSize: "11px", gap: "6px", background: "linear-gradient(135deg, #15803d, #0d530e)", color: "#ffffff", fontWeight: "700" }}
+                    >
+                      <Camera size={14} /> 📷 Take Live Photo
+                    </button>
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary" 
+                      onClick={() => afterGalleryRef.current?.click()}
+                      style={{ flex: 1, padding: "8px 12px", fontSize: "11px", gap: "6px", background: "var(--color-beige-light)", color: "var(--color-green-dark)" }}
+                    >
+                      <FolderPlus size={14} /> 📁 Upload from Gallery
+                    </button>
+                  </div>
+
+                  {/* Text URL Option */}
+                  <input 
+                    type="text" 
                     className="form-control" 
-                    placeholder="https://images.unsplash.com/photo-1595275313093-f112e077189d" 
+                    placeholder="Or paste web image URL..." 
                     value={proofForm.afterUrl}
                     onChange={e => setProofForm({...proofForm, afterUrl: e.target.value})}
-                    required
+                    style={{ fontSize: "11px" }}
                   />
+
+                  {/* Live Photo Preview */}
+                  {proofForm.afterUrl && (
+                    <div style={{ marginTop: "10px", position: "relative", height: "120px", borderRadius: "10px", overflow: "hidden", border: "2px solid #15803d" }}>
+                      <img src={proofForm.afterUrl} alt="After Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <button 
+                        type="button" 
+                        onClick={() => setProofForm(prev => ({ ...prev, afterUrl: "" }))}
+                        style={{ position: "absolute", top: "6px", right: "6px", background: "#dc2626", color: "#fff", border: "none", borderRadius: "50%", width: "24px", height: "24px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                        title="Remove Photo"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                      <span style={{ position: "absolute", bottom: "6px", left: "6px", background: "rgba(0,0,0,0.7)", color: "#fff", padding: "2px 6px", fontSize: "9px", borderRadius: "4px" }}>
+                        After Photo Attached
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <div className="form-group">
-                  <label>Estimate Waste Collected (KGs)</label>
-                  <input 
-                    type="number" 
-                    className="form-control" 
-                    value={proofForm.kgCollected}
-                    onChange={e => setProofForm({...proofForm, kgCollected: parseInt(e.target.value)})}
-                    required
-                  />
+
+                <div className="form-group" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "12px" }}>
+                  <div>
+                    <label>Estimate Waste (KGs)</label>
+                    <input 
+                      type="number" 
+                      className="form-control" 
+                      value={proofForm.kgCollected}
+                      onChange={e => setProofForm({...proofForm, kgCollected: parseInt(e.target.value)})}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label>Estimate Area (Sq Meters)</label>
+                    <input 
+                      type="number" 
+                      className="form-control" 
+                      value={proofForm.sqCleaned}
+                      onChange={e => setProofForm({...proofForm, sqCleaned: parseInt(e.target.value)})}
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label>Estimate Area Cleaned (Sq Meters)</label>
-                  <input 
-                    type="number" 
-                    className="form-control" 
-                    value={proofForm.sqCleaned}
-                    onChange={e => setProofForm({...proofForm, sqCleaned: parseInt(e.target.value)})}
-                    required
-                  />
-                </div>
+
                 <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
-                  <button type="submit" className="btn btn-primary">Submit for Validation</button>
+                  <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Submit Proof for Validation</button>
                   <button type="button" className="btn btn-secondary" onClick={() => setProofModal(false)}>Cancel</button>
                 </div>
               </form>
