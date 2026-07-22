@@ -1694,6 +1694,27 @@ export const DB = {
     }
   },
 
+  async updateDeliveryLocation(foodId, lat, lng, speed = 0) {
+    const courierLocation = {
+      lat: parseFloat(lat),
+      lng: parseFloat(lng),
+      speed: parseFloat(speed || 0),
+      timestamp: new Date().toISOString()
+    };
+
+    if (isConfigValid) {
+      await fbUpdateDoc(doc(db, "foods", foodId), { courierLocation });
+    } else {
+      const list = JSON.parse(localStorage.getItem("sevasetu_foods") || "[]");
+      const idx = list.findIndex(f => f.id === foodId);
+      if (idx !== -1) {
+        list[idx].courierLocation = courierLocation;
+        localStorage.setItem("sevasetu_foods", JSON.stringify(list));
+        notifySubscribers("foods", list);
+      }
+    }
+  },
+
   async updateUserProfile(name) {
     if (!currentLoggedInUser) throw new Error("No user is logged in.");
     const uid = currentLoggedInUser.uid;
