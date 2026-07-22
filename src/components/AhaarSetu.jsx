@@ -347,7 +347,7 @@ export default function AhaarSetu({
                           boxShadow: "3px 3px 8px rgba(34, 197, 94, 0.3)"
                         }}
                       >
-                        <Navigation size={13} /> 📍 Track Live Delivery (Zepto / Zomato Style)
+                        <Navigation size={13} /> 📍 Track Delivery
                       </button>
                     )}
 
