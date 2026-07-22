@@ -258,8 +258,46 @@ const MOCK_FOODS = [
 ];
 
 const MOCK_DRIVES = [
-  { id: "drive_1", title: "Indiranagar Park Clean-Up", description: "Join us in cleaning the public children's park after the weekend festival dump.", date: new Date(Date.now() + 2 * 24 * 3600000).toISOString().split('T')[0], time: "07:30 AM", location: "Indiranagar Public Park, 2nd Main", organizerId: "ngo_2", organizerName: "Clean Earth Foundation", pointsReward: 50, participants: ["vol_3", "vol_1"], proofs: [] },
-  { id: "drive_2", title: "Koramangala Lake Side Sweep", description: "Plastics and trash cleanup along the lakeside walking path.", date: new Date(Date.now() - 3 * 24 * 3600000).toISOString().split('T')[0], time: "08:00 AM", location: "Koramangala Lake Walkway", organizerId: "ngo_2", organizerName: "Clean Earth Foundation", pointsReward: 80, participants: ["vol_3", "vol_2"], proofs: [{ volunteerId: "vol_2", volunteerName: "Priya Sharma", imageUrl: "https://images.unsplash.com/photo-1595275313093-f112e077189d?w=500&auto=format&fit=crop&q=60", approved: true }] }
+  { 
+    id: "drive_1", 
+    title: "Indiranagar Park Clean-Up", 
+    description: "Join us in cleaning the public children's park after the weekend festival dump.", 
+    date: new Date(Date.now() + 2 * 24 * 3600000).toISOString().split('T')[0], 
+    time: "07:30 AM", 
+    location: "Indiranagar Public Park, 2nd Main", 
+    organizerId: "ngo_2", 
+    organizerName: "Clean Earth Foundation", 
+    pointsReward: 50, 
+    participants: ["vol_3", "vol_1"], 
+    proofs: [
+      { 
+        volunteerId: "vol_1", 
+        volunteerName: "Rahul Kumar", 
+        imageUrl: "https://images.unsplash.com/photo-1604186837056-8e7c2867b6f2?w=600&auto=format&fit=crop&q=80||https://images.unsplash.com/photo-1588880331179-bc9b93a8cb5e?w=600&auto=format&fit=crop&q=80||KGs Collected: 45||Sq Meters: 120", 
+        approved: true 
+      }
+    ] 
+  },
+  { 
+    id: "drive_2", 
+    title: "Koramangala Lake Side Sweep", 
+    description: "Plastics and trash cleanup along the lakeside walking path.", 
+    date: new Date(Date.now() - 3 * 24 * 3600000).toISOString().split('T')[0], 
+    time: "08:00 AM", 
+    location: "Koramangala Lake Walkway", 
+    organizerId: "ngo_2", 
+    organizerName: "Clean Earth Foundation", 
+    pointsReward: 80, 
+    participants: ["vol_3", "vol_2"], 
+    proofs: [
+      { 
+        volunteerId: "vol_2", 
+        volunteerName: "Priya Sharma", 
+        imageUrl: "https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?w=600&auto=format&fit=crop&q=80||https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=600&auto=format&fit=crop&q=80||KGs Collected: 75||Sq Meters: 230", 
+        approved: true 
+      }
+    ] 
+  }
 ];
 
 const MOCK_VOUCHERS = [
@@ -348,6 +386,12 @@ const initializeLocalStorage = () => {
     localStorage.setItem("sevasetu_trees", JSON.stringify(MOCK_TREES));
     localStorage.setItem("sevasetu_animal_rescues", JSON.stringify(MOCK_ANIMAL_RESCUES));
     localStorage.setItem("sevasetu_reviews", JSON.stringify(MOCK_REVIEWS));
+  } else {
+    // Migration helper: refresh drives if missing dual before/after photo URLs
+    const currentDrives = localStorage.getItem("sevasetu_drives");
+    if (!currentDrives || !currentDrives.includes("||")) {
+      localStorage.setItem("sevasetu_drives", JSON.stringify(MOCK_DRIVES));
+    }
   }
 };
 initializeLocalStorage();
