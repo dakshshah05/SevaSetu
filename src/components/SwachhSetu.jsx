@@ -1,6 +1,6 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Calendar, MapPin, Plus, Upload, Camera, FolderPlus, Image as ImageIcon, Trash2 } from "lucide-react";
+import { Calendar, MapPin, Plus, Upload, Camera, FolderPlus, Image as ImageIcon, Trash2, Lock, CheckCircle2, Video } from "lucide-react";
 
 export default function SwachhSetu({ 
   user, 
@@ -15,11 +15,18 @@ export default function SwachhSetu({
   const [proofModal, setProofModal] = useState(false);
   const [selectedDriveId, setSelectedDriveId] = useState("");
   
-  // File input refs for live camera & gallery selection
+  // File input refs for native camera & gallery selection
   const beforeCameraRef = useRef(null);
   const beforeGalleryRef = useRef(null);
   const afterCameraRef = useRef(null);
   const afterGalleryRef = useRef(null);
+
+  // Live In-Browser Camera Viewfinder State
+  const [liveCameraOpen, setLiveCameraOpen] = useState(false);
+  const [cameraField, setCameraField] = useState("beforeUrl"); // "beforeUrl" or "afterUrl"
+  const [cameraStream, setCameraStream] = useState(null);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
 
   // Form states
   const [driveForm, setDriveForm] = useState({ title: "", description: "", date: "", time: "", location: "", points: 50 });
@@ -28,7 +35,64 @@ export default function SwachhSetu({
   // Local before/after toggle state for mock view
   const [photoToggles, setPhotoToggles] = useState({});
 
-  // File Upload / Camera Processing Helper
+  // Attach camera stream to video element when liveCameraOpen changes
+  useEffect(() => {
+    if (liveCameraOpen && cameraStream && videoRef.current) {
+      videoRef.current.srcObject = cameraStream;
+    }
+  }, [liveCameraOpen, cameraStream]);
+
+  // Open Live Camera Viewfinder
+  const openLiveCamera = async (field) => {
+    setCameraField(field);
+    setLiveCameraOpen(true);
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
+      });
+      setCameraStream(mediaStream);
+    } catch (err) {
+      console.warn("Direct camera stream fallback notice:", err.message);
+      // Fallback to native camera file input
+      if (field === "beforeUrl" && beforeCameraRef.current) {
+        beforeCameraRef.current.click();
+      } else if (field === "afterUrl" && afterCameraRef.current) {
+        afterCameraRef.current.click();
+      }
+      setLiveCameraOpen(false);
+    }
+  };
+
+  // Snap Photo from Video Stream
+  const snapPhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+
+      setProofForm(prev => ({
+        ...prev,
+        [cameraField]: dataUrl
+      }));
+
+      closeLiveCamera();
+    }
+  };
+
+  // Close Camera Stream
+  const closeLiveCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+    }
+    setCameraStream(null);
+    setLiveCameraOpen(false);
+  };
+
+  // File Upload / Gallery Processing Helper
   const handleFileSelect = (e, field) => {
     const file = e.target.files[0];
     if (file) {
@@ -253,34 +317,61 @@ export default function SwachhSetu({
                                   <div style={{ color: "var(--text-secondary)", marginTop: "4px", fontWeight: "600" }}>
                                     ♻️ {kg} kg waste collected | 🧹 {sq} m² area sanitized
                                   </div>
-                                </div>
+                                  {/* Proof Immutability & Lock Status Badges */}
+                                  <div 
+                                    style={{ 
+                                      marginTop: "8px", 
+                                      padding: "6px 10px", 
+                                      borderRadius: "8px", 
+                                      background: p.approved ? "rgba(34, 197, 94, 0.12)" : "rgba(234, 179, 8, 0.12)", 
+                                      border: `1px solid ${p.approved ? "#22c55e" : "#eab308"}`, 
+                                      fontSize: "10px", 
+                                      fontWeight: "700", 
+                                      display: "flex", 
+                                      alignItems: "center", 
+                                      gap: "6px", 
+                                      color: p.approved ? "#15803d" : "#854d0e" 
+                                    }}
+                                  >
+                                    <Lock size={12} />
+                                    {p.approved ? "🔒 Points Rewarded & Verified (Permanently Locked)" : "🔒 Submitted Proof (Immutable & Pending Validation)"}
+                                  </div>
 
-                                {user?.role === "ngo" && !p.approved && !p.isShowcase && (
-                                  <button className="btn btn-primary" onClick={() => onApproveProof(d.id, p.volunteerId)} style={{ width: "100%", padding: "6px", fontSize: "11px", marginTop: "8px" }}>
-                                    Approve & Reward Points
-                                  </button>
-                                )}
+                                  {user?.role === "ngo" && !p.approved && !p.isShowcase && (
+                                    <button className="btn btn-primary" onClick={() => onApproveProof(d.id, p.volunteerId)} style={{ width: "100%", padding: "6px", fontSize: "11px", marginTop: "8px" }}>
+                                      Approve & Reward Points
+                                    </button>
+                                  )}
+                                </div>
                               </div>
                             );
                           })}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })()}
+                      );
+                    })()}
 
-                  <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
-                    {!d.participants.includes(user?.uid) && user?.role === "volunteer" && (
-                      <button className="btn btn-primary" onClick={() => onJoinDrive(d.id)} style={{ flex: 1 }}>Join Drive</button>
-                    )}
-                    {user?.role === "user" && (
-                      <button className="btn btn-secondary" onClick={onUpgradeToVolunteer} style={{ flex: 1, backgroundColor: "var(--color-green-dark)", color: "#fff" }}>
-                        Register as Volunteer to Join
-                      </button>
-                    )}
-                    {d.participants.includes(user?.uid) && (
-                      <button className="btn btn-secondary" onClick={() => handleOpenProof(d.id)} style={{ flex: 1 }}><Upload size={12} /> Submit Before/After Proof</button>
-                    )}
-                  </div>
+                    <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
+                      {!d.participants.includes(user?.uid) && user?.role === "volunteer" && (
+                        <button className="btn btn-primary" onClick={() => onJoinDrive(d.id)} style={{ flex: 1 }}>Join Drive</button>
+                      )}
+                      {user?.role === "user" && (
+                        <button className="btn btn-secondary" onClick={onUpgradeToVolunteer} style={{ flex: 1, backgroundColor: "var(--color-green-dark)", color: "#fff" }}>
+                          Register as Volunteer to Join
+                        </button>
+                      )}
+                      {d.participants.includes(user?.uid) && (
+                        d.proofs && d.proofs.some(p => p.volunteerId === user?.uid) ? (
+                          <button className="btn btn-secondary" disabled style={{ flex: 1, opacity: 0.8, cursor: "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", backgroundColor: "#f1f5f9", color: "#64748b" }}>
+                            <Lock size={13} /> 🔒 Proof Submitted (Locked & Immutable)
+                          </button>
+                        ) : (
+                          <button className="btn btn-secondary" onClick={() => handleOpenProof(d.id)} style={{ flex: 1 }}>
+                            <Upload size={12} /> Submit Before/After Proof
+                          </button>
+                        )
+                      )}
+                    </div>
                 </div>
               ))}
             </div>
@@ -370,7 +461,7 @@ export default function SwachhSetu({
                     <button 
                       type="button" 
                       className="btn btn-secondary" 
-                      onClick={() => beforeCameraRef.current?.click()}
+                      onClick={() => openLiveCamera("beforeUrl")}
                       style={{ flex: 1, padding: "8px 12px", fontSize: "11px", gap: "6px", background: "linear-gradient(135deg, #15803d, #0d530e)", color: "#ffffff", fontWeight: "700" }}
                     >
                       <Camera size={14} /> 📷 Take Live Photo
@@ -442,7 +533,7 @@ export default function SwachhSetu({
                     <button 
                       type="button" 
                       className="btn btn-secondary" 
-                      onClick={() => afterCameraRef.current?.click()}
+                      onClick={() => openLiveCamera("afterUrl")}
                       style={{ flex: 1, padding: "8px 12px", fontSize: "11px", gap: "6px", background: "linear-gradient(135deg, #15803d, #0d530e)", color: "#ffffff", fontWeight: "700" }}
                     >
                       <Camera size={14} /> 📷 Take Live Photo
@@ -602,6 +693,83 @@ export default function SwachhSetu({
                   <button type="button" className="btn btn-secondary" onClick={() => setDriveModal(false)}>Cancel</button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Live In-Browser Camera Viewfinder Modal */}
+      {liveCameraOpen && createPortal(
+        <div className="modal-overlay" style={{ backdropFilter: "blur(10px)", zIndex: 1200 }}>
+          <div className="modal-content" style={{ maxWidth: "560px", padding: "20px", borderRadius: "24px", background: "#0f172a", color: "#ffffff", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.8)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "12px", marginBottom: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Camera size={20} style={{ color: "#22c55e" }} />
+                <h4 style={{ margin: 0, fontSize: "16px", color: "#ffffff", fontWeight: "700" }}>
+                  Live Camera Viewfinder ({cameraField === "beforeUrl" ? "Before Cleanup" : "After Cleanup"})
+                </h4>
+              </div>
+              <button 
+                type="button"
+                onClick={closeLiveCamera} 
+                style={{ background: "none", border: "none", color: "#94a3b8", fontSize: "24px", cursor: "pointer", lineHeight: 1 }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Video Viewfinder Container */}
+            <div style={{ position: "relative", width: "100%", height: "320px", background: "#000000", borderRadius: "16px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <video 
+                ref={videoRef} 
+                autoPlay 
+                playsInline 
+                muted 
+                style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+              />
+              <canvas ref={canvasRef} style={{ display: "none" }} />
+              
+              {/* Target Viewfinder Overlay Lines */}
+              <div style={{ position: "absolute", border: "2px dashed rgba(34, 197, 94, 0.8)", width: "85%", height: "85%", borderRadius: "16px", pointerEvents: "none", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ background: "rgba(0,0,0,0.6)", color: "#22c55e", padding: "4px 10px", fontSize: "10px", borderRadius: "20px", fontWeight: "700" }}>
+                  Align Cleanup Target inside Viewfinder
+                </span>
+              </div>
+            </div>
+
+            {/* Shutter Snap Action Bar */}
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", marginTop: "20px" }}>
+              <button 
+                type="button" 
+                onClick={closeLiveCamera} 
+                className="btn btn-secondary" 
+                style={{ padding: "10px 20px", fontSize: "12px", background: "rgba(255,255,255,0.15)", color: "#fff", border: "none", borderRadius: "12px" }}
+              >
+                Cancel
+              </button>
+              
+              <button 
+                type="button" 
+                onClick={snapPhoto} 
+                style={{ 
+                  width: "64px", 
+                  height: "64px", 
+                  borderRadius: "50%", 
+                  background: "linear-gradient(135deg, #22c55e, #15803d)", 
+                  border: "4px solid #ffffff", 
+                  cursor: "pointer", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "center", 
+                  color: "#ffffff",
+                  boxShadow: "0 0 24px rgba(34, 197, 94, 0.8)",
+                  transition: "transform 0.1s ease"
+                }}
+                title="Snap Photo"
+              >
+                <Camera size={28} />
+              </button>
             </div>
           </div>
         </div>,
