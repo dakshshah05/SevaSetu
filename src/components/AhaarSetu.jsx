@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { MapPin, Clock, Building, Check, ShieldAlert, Award, Compass } from "lucide-react";
+import { MapPin, Clock, Building, Check, ShieldAlert, Award, Compass, Navigation } from "lucide-react";
+import LiveDeliveryTracker from "./LiveDeliveryTracker";
 
 function TransitMap({ foodId, location }) {
   const mapId = `map-${foodId}`;
@@ -141,6 +142,7 @@ export default function AhaarSetu({
   const [completeModal, setCompleteModal] = useState(false);
   const [certModal, setCertModal] = useState(false);
   const [selectedFood, setSelectedFood] = useState(null);
+  const [liveTrackingItem, setLiveTrackingItem] = useState(null);
   
   // Weekly Scheduler
   const [scheduleModal, setScheduleModal] = useState(false);
@@ -326,7 +328,30 @@ export default function AhaarSetu({
                       </div>
                     )}
 
-                    <div style={{ marginTop: "auto", display: "flex", gap: "8px" }}>
+                    {/* Live Delivery Tracking Action (Zepto / Zomato Style) */}
+                    {(f.status === "claimed" || f.status === "in-transit" || f.status === "pending") && (
+                      <button 
+                        className="btn btn-secondary" 
+                        onClick={() => setLiveTrackingItem(f)}
+                        style={{ 
+                          width: "100%", 
+                          marginTop: "8px", 
+                          background: "linear-gradient(135deg, #22c55e 0%, #15803d 100%)", 
+                          color: "#ffffff",
+                          fontWeight: "800",
+                          fontSize: "11px",
+                          gap: "6px",
+                          padding: "8px 12px",
+                          border: "none",
+                          borderRadius: "14px",
+                          boxShadow: "3px 3px 8px rgba(34, 197, 94, 0.3)"
+                        }}
+                      >
+                        <Navigation size={13} /> 📍 Track Live Delivery (Zepto / Zomato Style)
+                      </button>
+                    )}
+
+                    <div style={{ marginTop: "auto", display: "flex", gap: "8px", paddingTop: "8px" }}>
                       {f.status === "pending" && user?.role === "volunteer" && (
                         <button className="btn btn-primary" onClick={() => onClaimPickup(f.id)} style={{ width: "100%" }}><Check size={12} /> Claim Route</button>
                       )}
@@ -487,6 +512,16 @@ export default function AhaarSetu({
           </div>
         </div>,
         document.body
+      )}
+
+      {/* Live Delivery Tracking Modal (Zepto / Zomato Style) */}
+      {liveTrackingItem && (
+        <LiveDeliveryTracker 
+          item={liveTrackingItem} 
+          user={user} 
+          onClose={() => setLiveTrackingItem(null)} 
+          triggerToast={triggerToast} 
+        />
       )}
 
     </div>
