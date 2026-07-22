@@ -318,9 +318,10 @@ const MOCK_MEDS = [
 ];
 
 const MOCK_REVIEWS = [
-  { id: "rev_1", userName: "Golden Spoon Restaurant", rating: 5, category: "Ahaar Setu", text: "SevaSetu has made it so easy for our restaurant to donate leftover meals. We feel great knowing it goes to shelters instead of landfills!", date: new Date().toISOString() },
-  { id: "rev_2", userName: "Aarav Mehta", rating: 5, category: "Swachh Setu", text: "Organizing and participating in sanitation campaigns with Swachh Setu has brought our community together. Puffy graphics, points, and real impact!", date: new Date().toISOString() },
-  { id: "rev_3", userName: "Priya Sharma", rating: 5, category: "Shiksha Setu", text: "Tutoring kids in the evening through Shiksha Setu is the highlight of my week. A must-join platform!", date: new Date().toISOString() }
+  { id: "rev_1", userName: "Golden Spoon Restaurant", userRole: "restaurant", rating: 5, category: "Ahaar Setu", text: "SevaSetu has made it so easy for our restaurant to donate leftover meals. We feel great knowing it goes to shelters instead of landfills!", date: new Date().toISOString() },
+  { id: "rev_2", userName: "Rahul Kumar (Volunteer)", userRole: "volunteer", rating: 5, category: "Ahaar Setu", text: "Picked up 50 meal boxes from Green Garden Cafe and delivered to Indiranagar Shelter within 30 minutes! Prompt packaging and smooth process.", date: new Date().toISOString() },
+  { id: "rev_3", userName: "Aarav Mehta", userRole: "volunteer", rating: 5, category: "Swachh Setu", text: "Organizing and participating in sanitation campaigns with Swachh Setu has brought our community together. Puffy graphics, points, and real impact!", date: new Date().toISOString() },
+  { id: "rev_4", userName: "Priya Sharma", userRole: "volunteer", rating: 5, category: "Shiksha Setu", text: "Tutoring kids in the evening through Shiksha Setu is the highlight of my week. A must-join platform!", date: new Date().toISOString() }
 ];
 
 // Local state initialization for Mock Fallback
@@ -1674,9 +1675,10 @@ export const DB = {
     }
   },
 
-  async submitReview(userName, rating, category, text) {
+  async submitReview(userName, rating, category, text, userRole = "user") {
     const payload = {
       userName,
+      userRole,
       rating: parseInt(rating),
       category,
       text,

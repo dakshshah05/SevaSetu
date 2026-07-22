@@ -40,9 +40,10 @@ export default function Reviews({ user, triggerToast }) {
     }
 
     const nameToUse = user ? user.name : (authorName.trim() || "Anonymous Citizen");
+    const roleToUse = user ? user.role : "citizen";
 
     try {
-      await DB.submitReview(nameToUse, rating, category, text);
+      await DB.submitReview(nameToUse, rating, category, text, roleToUse);
       triggerToast("Thank you! Your review has been posted successfully.");
       setText("");
       setAuthorName("");
@@ -131,7 +132,24 @@ export default function Reviews({ user, triggerToast }) {
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
                       <div>
-                        <h4 style={{ margin: 0, fontSize: "14px", fontWeight: "700" }}>{rev.userName}</h4>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <h4 style={{ margin: 0, fontSize: "14px", fontWeight: "700" }}>{rev.userName}</h4>
+                          {rev.userRole && (
+                            <span 
+                              style={{ 
+                                fontSize: "9px", 
+                                fontWeight: "700", 
+                                textTransform: "uppercase", 
+                                padding: "1px 6px", 
+                                borderRadius: "8px",
+                                background: rev.userRole === "volunteer" ? "#dcfce7" : rev.userRole === "restaurant" ? "#fef3c7" : "#e0e7ff",
+                                color: rev.userRole === "volunteer" ? "#15803d" : rev.userRole === "restaurant" ? "#b45309" : "#4338ca"
+                              }}
+                            >
+                              {rev.userRole}
+                            </span>
+                          )}
+                        </div>
                         <span className="badge badge-pending" style={{ fontSize: "8px", padding: "2px 8px", marginTop: "4px" }}>
                           {rev.category}
                         </span>

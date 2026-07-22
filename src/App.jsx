@@ -52,12 +52,61 @@ import HelpCenter from "./components/HelpCenter";
 import Profile from "./components/Profile";
 import Settings from "./components/Settings";
 
+const NAV_ITEMS = [
+  { id: "dashboard", label: "Dashboard", mobileLabel: "📊 Dashboard", icon: LayoutDashboard },
+  { id: "food-waste", label: "Ahaar Setu", mobileLabel: "🍲 Ahaar Setu (Food)", icon: Utensils },
+  { id: "cleanup-drives", label: "Swachh Setu", mobileLabel: "🧹 Swachh Setu (Sanitation)", icon: Trash2 },
+  { id: "ngo-admin", label: "Sahaayak Setu", mobileLabel: "🤝 Sahaayak Setu (NGOs)", icon: Building },
+  { id: "shiksha", label: "Shiksha Setu", mobileLabel: "🎓 Shiksha Setu (Education)", icon: GraduationCap },
+  { id: "swasthya", label: "Swasthya Setu", mobileLabel: "🩺 Swasthya Setu (Health)", icon: Stethoscope },
+  { id: "vastra", label: "Vastra Setu", mobileLabel: "👕 Vastra Setu (Clothes)", icon: Shirt },
+  { id: "punya", label: "Punya Setu", mobileLabel: "❤️ Punya Setu (Elderly)", icon: Heart },
+  { id: "vriksha", label: "Vriksha Setu", mobileLabel: "🌱 Vriksha Setu (Trees)", icon: Sprout },
+  { id: "pashu", label: "Pashu Setu", mobileLabel: "🐾 Pashu Setu (Animals)", icon: PawPrint },
+  { id: "crowd", label: "Crowdfund", mobileLabel: "🪙 NGO Crowdfunding", icon: Coins },
+  { id: "sos", label: "SOS", mobileLabel: "🚨 Emergency SOS", icon: ShieldAlert, badge: true },
+  { id: "rewards-store", label: "Rewards", mobileLabel: "🎁 Rewards Store", icon: Gift },
+  { id: "reviews", label: "Reviews", mobileLabel: "💬 Reviews", icon: MessageSquare },
+  { id: "reports", label: "Reports", mobileLabel: "📈 Reports & Charts", icon: BarChart3 },
+  { id: "help", label: "Help Center", mobileLabel: "❓ Help Center", icon: HelpCircle }
+];
+
+export function isViewAllowed(viewId, user) {
+  if (!user) return true;
+  const role = user.role;
+
+  // Universal utility views accessible to all authenticated users
+  if (viewId === "profile" || viewId === "settings" || viewId === "help") {
+    return true;
+  }
+
+  // NGO: All pages Except(Rewards)
+  if (role === "ngo") {
+    return viewId !== "rewards-store";
+  }
+
+  // Restaurant: AhaarSetu (food-waste), Reviews by Volunteer (reviews)
+  if (role === "restaurant") {
+    return viewId === "food-waste" || viewId === "reviews";
+  }
+
+  // Volunteer: All pages Except(Reports)
+  if (role === "volunteer") {
+    return viewId !== "reports";
+  }
+
+  return true;
+}
+
 export default function App() {
   // --- STATE SYSTEM ---
   const [activeView, setActiveView] = useState("dashboard");
   const [user, setUser] = useState(null);
   const [showLanding, setShowLanding] = useState(true);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+
+  // Compute allowed navigation items for current user role
+  const allowedNavItems = NAV_ITEMS.filter(item => isViewAllowed(item.id, user));
 
   useEffect(() => {
     if (user) {
@@ -156,6 +205,15 @@ export default function App() {
       elements.forEach(el => observer.unobserve(el));
     };
   }, [activeView]);
+
+  // --- VIEW ACCESS CONTROL GUARD ---
+  useEffect(() => {
+    if (user && !isViewAllowed(activeView, user)) {
+      const defaultAllowed = allowedNavItems.length > 0 ? allowedNavItems[0].id : "food-waste";
+      setActiveView(defaultAllowed);
+      triggerToast(`Access Restricted: ${user.role.toUpperCase()} accounts cannot access this page. Redirected to ${defaultAllowed.toUpperCase()}.`, true);
+    }
+  }, [user, activeView, allowedNavItems, triggerToast]);
 
   // --- REAL-TIME DATA SYNC ---
   useEffect(() => {
@@ -353,22 +411,9 @@ export default function App() {
             value={activeView} 
             onChange={(e) => setActiveView(e.target.value)}
           >
-            <option value="dashboard">📊 Dashboard</option>
-            <option value="food-waste">🍲 Ahaar Setu (Food)</option>
-            <option value="cleanup-drives">🧹 Swachh Setu (Sanitation)</option>
-            <option value="ngo-admin">🤝 Sahaayak Setu (NGOs)</option>
-            <option value="shiksha">🎓 Shiksha Setu (Education)</option>
-            <option value="swasthya">🩺 Swasthya Setu (Health)</option>
-            <option value="vastra">👕 Vastra Setu (Clothes)</option>
-            <option value="punya">❤️ Punya Setu (Elderly)</option>
-            <option value="vriksha">🌱 Vriksha Setu (Trees)</option>
-            <option value="pashu">🐾 Pashu Setu (Animals)</option>
-            <option value="crowd">🪙 NGO Crowdfunding</option>
-            <option value="sos">🚨 Emergency SOS</option>
-            <option value="rewards-store">🎁 Rewards Store</option>
-            <option value="reviews">💬 Reviews</option>
-            <option value="reports">📈 Reports & Charts</option>
-            <option value="help">❓ Help Center</option>
+            {allowedNavItems.map(item => (
+              <option key={item.id} value={item.id}>{item.mobileLabel}</option>
+            ))}
           </select>
         </div>
 
@@ -376,187 +421,28 @@ export default function App() {
           {/* Absolute sliding highlight background */}
           <div className="nav-highlight-pill" style={pillStyle} />
 
-          {/* 13 Nav Tabs */}
-          <div 
-            ref={el => navItemsRef.current[0] = el}
-            className={`taskbar-item ${activeView === "dashboard" ? "active" : ""}`} 
-            onClick={() => setActiveView("dashboard")} 
-            onMouseEnter={() => setHoveredIndex(0)}
-            role="button"
-          >
-            <LayoutDashboard />
-            <span>Dashboard</span>
-          </div>
-
-          <div 
-            ref={el => navItemsRef.current[1] = el}
-            className={`taskbar-item ${activeView === "food-waste" ? "active" : ""}`} 
-            onClick={() => setActiveView("food-waste")} 
-            onMouseEnter={() => setHoveredIndex(1)}
-            role="button"
-          >
-            <Utensils />
-            <span>Ahaar Setu</span>
-          </div>
-
-          <div 
-            ref={el => navItemsRef.current[2] = el}
-            className={`taskbar-item ${activeView === "cleanup-drives" ? "active" : ""}`} 
-            onClick={() => setActiveView("cleanup-drives")} 
-            onMouseEnter={() => setHoveredIndex(2)}
-            role="button"
-          >
-            <Trash2 />
-            <span>Swachh Setu</span>
-          </div>
-
-          <div 
-            ref={el => navItemsRef.current[3] = el}
-            className={`taskbar-item ${activeView === "ngo-admin" ? "active" : ""}`} 
-            onClick={() => setActiveView("ngo-admin")} 
-            onMouseEnter={() => setHoveredIndex(3)}
-            role="button"
-          >
-            <Building />
-            <span>Sahaayak Setu</span>
-          </div>
-
-          <div 
-            ref={el => navItemsRef.current[4] = el}
-            className={`taskbar-item ${activeView === "shiksha" ? "active" : ""}`} 
-            onClick={() => setActiveView("shiksha")} 
-            onMouseEnter={() => setHoveredIndex(4)}
-            role="button"
-          >
-            <GraduationCap />
-            <span>Shiksha Setu</span>
-          </div>
-
-          <div 
-            ref={el => navItemsRef.current[5] = el}
-            className={`taskbar-item ${activeView === "swasthya" ? "active" : ""}`} 
-            onClick={() => setActiveView("swasthya")} 
-            onMouseEnter={() => setHoveredIndex(5)}
-            role="button"
-          >
-            <Stethoscope />
-            <span>Swasthya Setu</span>
-          </div>
-
-          <div 
-            ref={el => navItemsRef.current[6] = el}
-            className={`taskbar-item ${activeView === "vastra" ? "active" : ""}`} 
-            onClick={() => setActiveView("vastra")} 
-            onMouseEnter={() => setHoveredIndex(6)}
-            role="button"
-          >
-            <Shirt />
-            <span>Vastra Setu</span>
-          </div>
-
-          <div 
-            ref={el => navItemsRef.current[7] = el}
-            className={`taskbar-item ${activeView === "punya" ? "active" : ""}`} 
-            onClick={() => setActiveView("punya")} 
-            onMouseEnter={() => setHoveredIndex(7)}
-            role="button"
-          >
-            <Heart />
-            <span>Punya Setu</span>
-          </div>
-
-          <div 
-            ref={el => navItemsRef.current[8] = el}
-            className={`taskbar-item ${activeView === "vriksha" ? "active" : ""}`} 
-            onClick={() => setActiveView("vriksha")} 
-            onMouseEnter={() => setHoveredIndex(8)}
-            role="button"
-          >
-            <Sprout />
-            <span>Vriksha Setu</span>
-          </div>
-
-          <div 
-            ref={el => navItemsRef.current[9] = el}
-            className={`taskbar-item ${activeView === "pashu" ? "active" : ""}`} 
-            onClick={() => setActiveView("pashu")} 
-            onMouseEnter={() => setHoveredIndex(9)}
-            role="button"
-          >
-            <PawPrint />
-            <span>Pashu Setu</span>
-          </div>
-
-          <div 
-            ref={el => navItemsRef.current[10] = el}
-            className={`taskbar-item ${activeView === "crowd" ? "active" : ""}`} 
-            onClick={() => setActiveView("crowd")} 
-            onMouseEnter={() => setHoveredIndex(10)}
-            role="button"
-          >
-            <Coins />
-            <span>Crowdfund</span>
-          </div>
-
-          <div 
-            ref={el => navItemsRef.current[11] = el}
-            className={`taskbar-item ${activeView === "sos" ? "active" : ""}`} 
-            onClick={() => setActiveView("sos")} 
-            onMouseEnter={() => setHoveredIndex(11)}
-            role="button"
-          >
-            <ShieldAlert />
-            <span>SOS</span>
-            {activeSOS.length > 0 && (
-              <span style={{ backgroundColor: "var(--color-green-dark)", color: "var(--color-beige-light)", borderRadius: "50%", padding: "1px 5px", fontSize: "9px", fontWeight: "bold", marginLeft: "4px" }}>
-                {activeSOS.length}
-              </span>
-            )}
-          </div>
-
-          <div 
-            ref={el => navItemsRef.current[12] = el}
-            className={`taskbar-item ${activeView === "rewards-store" ? "active" : ""}`} 
-            onClick={() => setActiveView("rewards-store")} 
-            onMouseEnter={() => setHoveredIndex(12)}
-            role="button"
-          >
-            <Gift />
-            <span>Rewards</span>
-          </div>
-
-          <div 
-            ref={el => navItemsRef.current[13] = el}
-            className={`taskbar-item ${activeView === "reviews" ? "active" : ""}`} 
-            onClick={() => setActiveView("reviews")} 
-            onMouseEnter={() => setHoveredIndex(13)}
-            role="button"
-          >
-            <MessageSquare />
-            <span>Reviews</span>
-          </div>
-
-          <div 
-            ref={el => navItemsRef.current[14] = el}
-            className={`taskbar-item ${activeView === "reports" ? "active" : ""}`} 
-            onClick={() => setActiveView("reports")} 
-            onMouseEnter={() => setHoveredIndex(14)}
-            role="button"
-          >
-            <BarChart3 />
-            <span>Reports</span>
-          </div>
-
-          <div 
-            ref={el => navItemsRef.current[15] = el}
-            className={`taskbar-item ${activeView === "help" ? "active" : ""}`} 
-            onClick={() => setActiveView("help")} 
-            onMouseEnter={() => setHoveredIndex(15)}
-            role="button"
-          >
-            <HelpCircle />
-            <span>Help Center</span>
-          </div>
+          {/* Dynamic Filtered Nav Tabs based on Access Control */}
+          {allowedNavItems.map((item, idx) => {
+            const IconComponent = item.icon;
+            return (
+              <div 
+                key={item.id}
+                ref={el => navItemsRef.current[idx] = el}
+                className={`taskbar-item ${activeView === item.id ? "active" : ""}`} 
+                onClick={() => setActiveView(item.id)} 
+                onMouseEnter={() => setHoveredIndex(idx)}
+                role="button"
+              >
+                <IconComponent />
+                <span>{item.label}</span>
+                {item.badge && activeSOS.length > 0 && (
+                  <span style={{ backgroundColor: "var(--color-green-dark)", color: "var(--color-beige-light)", borderRadius: "50%", padding: "1px 5px", fontSize: "9px", fontWeight: "bold", marginLeft: "4px" }}>
+                    {activeSOS.length}
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </nav>
 
         {user ? (
