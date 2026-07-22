@@ -1802,6 +1802,177 @@ export const DB = {
     currentLoggedInUser = null;
     localStorage.removeItem("sevasetu_current_user");
     authChangeListeners.forEach(cb => cb(null));
+  },
+
+  // 13. Sahaayak Setu - NGO Roster & Skill Micro-Tasks
+  async joinNGO(ngoId) {
+    if (!currentLoggedInUser) throw new Error("Please log in to join an NGO roster.");
+    currentLoggedInUser.ngoId = ngoId;
+    localStorage.setItem("sevasetu_current_user", JSON.stringify(currentLoggedInUser));
+    authChangeListeners.forEach(cb => cb(currentLoggedInUser));
+
+    if (isConfigValid) {
+      const userRef = doc(db, "users", currentLoggedInUser.uid);
+      await fbUpdateDoc(userRef, { ngoId });
+    } else {
+      const users = JSON.parse(localStorage.getItem("sevasetu_users") || "[]");
+      const idx = users.findIndex(u => u.uid === currentLoggedInUser.uid);
+      if (idx !== -1) {
+        users[idx].ngoId = ngoId;
+        localStorage.setItem("sevasetu_users", JSON.stringify(users));
+        notifySubscribers("users", users);
+      }
+    }
+  },
+
+  async approveDriveProof(driveId, volunteerId) {
+    if (isConfigValid) {
+      const driveRef = doc(db, "drives", driveId);
+      const driveSnap = await fbGetDoc(driveRef);
+      if (driveSnap.exists()) {
+        const driveData = driveSnap.data();
+        const proofs = (driveData.proofs || []).map(p => {
+          if (p.volunteerId === volunteerId) {
+            return { ...p, approved: true };
+          }
+          return p;
+        });
+        await fbUpdateDoc(driveRef, { proofs });
+
+        // Reward points to volunteer
+        const volRef = doc(db, "users", volunteerId);
+        const volSnap = await fbGetDoc(volRef);
+        if (volSnap.exists()) {
+          const currentPts = volSnap.data().rewardPoints || 0;
+          const currentCount = volSnap.data().completedCount || 0;
+          await fbUpdateDoc(volRef, { 
+            rewardPoints: currentPts + (driveData.pointsReward || 50),
+            completedCount: currentCount + 1
+          });
+        }
+      }
+    } else {
+      const drives = JSON.parse(localStorage.getItem("sevasetu_drives") || "[]");
+      const dIdx = drives.findIndex(d => d.id === driveId);
+      if (dIdx !== -1) {
+        drives[dIdx].proofs = (drives[dIdx].proofs || []).map(p => {
+          if (p.volunteerId === volunteerId) {
+            return { ...p, approved: true };
+          }
+          return p;
+        });
+        localStorage.setItem("sevasetu_drives", JSON.stringify(drives));
+        notifySubscribers("drives", drives);
+
+        // Update volunteer user points
+        const users = JSON.parse(localStorage.getItem("sevasetu_users") || "[]");
+        const uIdx = users.findIndex(u => u.uid === volunteerId);
+        if (uIdx !== -1) {
+          users[uIdx].rewardPoints = (users[uIdx].rewardPoints || 0) + (drives[dIdx].pointsReward || 50);
+          users[uIdx].completedCount = (users[uIdx].completedCount || 0) + 1;
+          localStorage.setItem("sevasetu_users", JSON.stringify(users));
+          notifySubscribers("users", users);
+        }
+      }
+    }
+  },
+
+  async createSkillTask(title, description, requiredSkill, hours, points) {
+    if (!currentLoggedInUser) throw new Error("Please log in to publish a skill task.");
+    const payload = {
+      title,
+      description,
+      requiredSkill,
+      hoursReward: parseInt(hours) || 4,
+      pointsReward: parseInt(points) || 60,
+      organizerId: currentLoggedInUser.uid,
+      organizerName: currentLoggedInUser.name,
+      status: "open",
+      assignedTo: null,
+      assignedToName: null,
+      workLink: "",
+      createdAt: new Date().toISOString()
+    };
+    if (isConfigValid) {
+      await fbAddDoc(collection(db, "skills"), payload);
+    } else {
+      const skills = JSON.parse(localStorage.getItem("sevasetu_skills") || "[]");
+      const newTask = { id: "skill_" + Date.now(), ...payload };
+      skills.unshift(newTask);
+      localStorage.setItem("sevasetu_skills", JSON.stringify(skills));
+      notifySubscribers("skills", skills);
+    }
+  },
+
+  async applyToSkillTask(id) {
+    if (!currentLoggedInUser) throw new Error("Please log in as a volunteer to claim work.");
+    if (isConfigValid) {
+      const taskRef = doc(db, "skills", id);
+      await fbUpdateDoc(taskRef, {
+        status: "assigned",
+        assignedTo: currentLoggedInUser.uid,
+        assignedToName: currentLoggedInUser.name
+      });
+    } else {
+      const skills = JSON.parse(localStorage.getItem("sevasetu_skills") || "[]");
+      const idx = skills.findIndex(s => s.id === id);
+      if (idx !== -1) {
+        skills[idx].status = "assigned";
+        skills[idx].assignedTo = currentLoggedInUser.uid;
+        skills[idx].assignedToName = currentLoggedInUser.name;
+        localStorage.setItem("sevasetu_skills", JSON.stringify(skills));
+        notifySubscribers("skills", skills);
+      }
+    }
+  },
+
+  async completeSkillTask(id, workLink) {
+    if (!currentLoggedInUser) throw new Error("Please log in to submit deliverables.");
+    let pointsAwarded = 60;
+    let hoursAwarded = 4;
+
+    if (isConfigValid) {
+      const taskRef = doc(db, "skills", id);
+      const taskSnap = await fbGetDoc(taskRef);
+      if (taskSnap.exists()) {
+        pointsAwarded = taskSnap.data().pointsReward || 60;
+        hoursAwarded = taskSnap.data().hoursReward || 4;
+        await fbUpdateDoc(taskRef, {
+          status: "completed",
+          workLink
+        });
+      }
+      const userRef = doc(db, "users", currentLoggedInUser.uid);
+      const userSnap = await fbGetDoc(userRef);
+      if (userSnap.exists()) {
+        const currentPts = userSnap.data().rewardPoints || 0;
+        const currentHrs = userSnap.data().impactHours || 0;
+        await fbUpdateDoc(userRef, {
+          rewardPoints: currentPts + pointsAwarded,
+          impactHours: currentHrs + hoursAwarded
+        });
+      }
+    } else {
+      const skills = JSON.parse(localStorage.getItem("sevasetu_skills") || "[]");
+      const idx = skills.findIndex(s => s.id === id);
+      if (idx !== -1) {
+        skills[idx].status = "completed";
+        skills[idx].workLink = workLink;
+        pointsAwarded = skills[idx].pointsReward || 60;
+        hoursAwarded = skills[idx].hoursReward || 4;
+        localStorage.setItem("sevasetu_skills", JSON.stringify(skills));
+        notifySubscribers("skills", skills);
+      }
+
+      const users = JSON.parse(localStorage.getItem("sevasetu_users") || "[]");
+      const uIdx = users.findIndex(u => u.uid === currentLoggedInUser.uid);
+      if (uIdx !== -1) {
+        users[uIdx].rewardPoints = (users[uIdx].rewardPoints || 0) + pointsAwarded;
+        users[uIdx].impactHours = (users[uIdx].impactHours || 0) + hoursAwarded;
+        localStorage.setItem("sevasetu_users", JSON.stringify(users));
+        notifySubscribers("users", users);
+      }
+    }
   }
 }
 

@@ -168,7 +168,7 @@ export default function Dashboard({
 
           <div className="leaderboard-list">
             {activeLeaderboardTab === "volunteers" ? (
-              leaderboard.volunteers.map((vol, idx) => (
+              (leaderboard?.volunteers || []).map((vol, idx) => (
                 <div key={vol.uid} className={`leaderboard-item rank-${idx + 1}`}>
                   <div className="leaderboard-item-info">
                     <span className="leaderboard-rank">#{idx + 1}</span>
@@ -178,7 +178,7 @@ export default function Dashboard({
                 </div>
               ))
             ) : (
-              leaderboard.restaurants.map((rest, idx) => (
+              (leaderboard?.restaurants || []).map((rest, idx) => (
                 <div key={rest.uid} className={`leaderboard-item rank-${idx + 1}`}>
                   <div className="leaderboard-item-info">
                     <span className="leaderboard-rank">#{idx + 1}</span>

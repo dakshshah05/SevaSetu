@@ -28,7 +28,7 @@ export default function SahaayakSetu({
     { id: "ngo_2", name: "Clean Earth Foundation", email: "clean@seva.org", description: "Dedicated to local sanitation drives and public cleanliness campaigns.", volunteersCount: 3, completedCount: 19 }
   ];
 
-  const ngoVolunteers = leaderboard.volunteers.filter(vol => {
+  const ngoVolunteers = (leaderboard?.volunteers || []).filter(vol => {
     if (user?.role === "ngo") {
       return vol.ngoId === user.uid;
     }
